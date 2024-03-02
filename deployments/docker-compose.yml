@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    ports:
+      - "8080:8080" # Expose the port your app runs on
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=mysecretpassword
+      - DB_NAME=tamra-postgis
+    networks:
+      - tamra-network
+    volumes:
+      - ../:/usr/src/
+
+  db:
+    image: postgis/postgis
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: tamra-postgis
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tamra-network
+
+# Define the network. The reason it is empty is because we want to use the default network driver.
+networks:
+  tamra-network:
+
+# Define the volume to store the data.
+volumes:
+  postgres_data:
