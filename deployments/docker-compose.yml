@@ -10,15 +10,10 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=mysecretpassword
-      - DB_NAME=tamra-postgis
+      - DB_CONNECTION_STRING="postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable"
+      - PORT=8080
     networks:
       - tamra-network
-    volumes:
-      - ../:/usr/src/
 
   db:
     image: postgis/postgis
