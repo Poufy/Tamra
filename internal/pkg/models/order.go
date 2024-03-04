@@ -14,3 +14,30 @@ type Order struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
+
+type CreateOrderRequest struct {
+	UserID       int    `json:"user_id" validate:"required"`
+	RestaurantID int    `json:"restaurant_id" validate:"required"`
+	Code         string `json:"code" validate:"required"`
+	Description  string `json:"description"`
+	State        string `json:"state" validate:"required"`
+}
+
+type UpdateOrderRequest struct {
+	UserID       int    `json:"user_id" validate:"required"`
+	RestaurantID int    `json:"restaurant_id" validate:"required"`
+	Code         string `json:"code" validate:"required"`
+	Description  string `json:"description"`
+	State        string `json:"state" validate:"required"`
+}
+
+type OrderResponse struct {
+	ID           int       `json:"id"`
+	UserID       int       `json:"user_id"`
+	RestaurantID int       `json:"restaurant_id"`
+	Code         string    `json:"code"`
+	Description  string    `json:"description"`
+	State        string    `json:"state"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
