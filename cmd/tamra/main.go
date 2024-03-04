@@ -28,6 +28,9 @@ func main() {
 	// Get the validator
 	validator := utils.NewValidator()
 
+	// Get the logger
+	logger := utils.NewLogger(config.LogLevel)
+
 	// Create the user repository
 	userRepository := repositories.NewUserRepository(db)
 
@@ -35,7 +38,7 @@ func main() {
 	userService := services.NewUserService(userRepository)
 
 	// Create the user handler
-	userHandler := handlers.NewUserHandler(userService, validator)
+	userHandler := handlers.NewUserHandler(userService, validator, logger)
 
 	// Use chi as the router
 	r := chi.NewRouter()
@@ -45,7 +48,7 @@ func main() {
 		r.Post("/", userHandler.CreateUser)
 		r.Get("/", userHandler.GetUsers)
 		r.Get("/{id}", userHandler.GetUser)
-		r.Put("/{id}", userHandler.UpdateUser)
+		r.Patch("/{id}", userHandler.UpdateUser)
 		r.Delete("/{id}", userHandler.DeleteUser)
 	})
 

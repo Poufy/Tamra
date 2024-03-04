@@ -17,13 +17,13 @@ func NewUserService(userRepository repositories.UserRepository) *UserService {
 	return &UserService{userRepository: userRepository}
 }
 
-func (s *UserService) CreateUser(user *models.User) error {
-	err := s.userRepository.CreateUser(user)
+func (s *UserService) CreateUser(user *models.User) (*models.User, error) {
+	createdUser, err := s.userRepository.CreateUser(user)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	return nil
+	return createdUser, nil
 }
 
 func (s *UserService) GetUser(id int) (*models.User, error) {
@@ -44,13 +44,13 @@ func (s *UserService) GetUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) UpdateUser(user *models.User) error {
-	err := s.userRepository.UpdateUser(user)
+func (s *UserService) UpdateUser(user *models.User) (*models.User, error) {
+	updatedUser, err := s.userRepository.UpdateUser(user)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to update user: %w", err)
+		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
-	return nil
+	return updatedUser, nil
 }
 
 func (s *UserService) DeleteUser(id int) error {
