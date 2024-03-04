@@ -27,5 +27,5 @@ RUN pwd
 RUN go build -o tamra
 
 # Command to run the executable
-CMD ["./tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable"]
+CMD ["./tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug"]
 # CMD ["air", "-c", ".air.toml"]

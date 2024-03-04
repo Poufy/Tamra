@@ -39,6 +39,4 @@ type UserResponse struct {
 	Phone             string    `json:"phone"`
 	Radius            int       `json:"radius"`
 	LastOrderReceived time.Time `json:"last_order_received"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
 }

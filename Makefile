@@ -10,9 +10,12 @@ docker-down:
 	@echo "Stopping Docker containers..."
 	docker-compose -f $(DOCKER_COMPOSE_FILE) down
 	
-# Run migrations
-migrate:
+migrate-up:
 	@echo "Running migrations..."
 	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" up
 
-.PHONY: migrate docker-up docker-down
+migrate-down:
+	@echo "Running migrations..."
+	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" down
+
+.PHONY: migrate-up migrate-down docker-up docker-down
