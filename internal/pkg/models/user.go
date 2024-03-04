@@ -11,6 +11,7 @@ type User struct {
 	IsActive          bool      `json:"is_active"`
 	Phone             string    `json:"phone" validate:"required,e164"`
 	Radius            int       `json:"radius" validate:"required"`
+	FCMToken          string    `json:"fcm_token" validate:"required"`
 	LastOrderReceived time.Time `json:"last_order_received"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
@@ -21,6 +22,7 @@ type CreateUserRequest struct {
 	Latitude  float64 `json:"latitude" validate:"required"`
 	Phone     string  `json:"phone" validate:"required,e164"`
 	Radius    int     `json:"radius" validate:"required"`
+	FCMToken  string  `json:"fcm_token" validate:"required"`
 }
 
 type UpdateUserRequest struct {
@@ -29,6 +31,7 @@ type UpdateUserRequest struct {
 	IsActive  bool    `json:"is_active"`
 	Phone     string  `json:"phone" validate:"required,e164"`
 	Radius    int     `json:"radius" validate:"required"`
+	FCMToken  string  `json:"fcm_token" validate:"required"`
 }
 
 type UserResponse struct {
