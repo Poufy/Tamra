@@ -4,6 +4,7 @@ import (
 	"Tamra/internal/pkg/models"
 	"Tamra/internal/pkg/utils"
 	"database/sql"
+	"fmt"
 )
 
 //? Define generic error messages as the errors shouldn't be tied to the repository implementation
@@ -37,14 +38,15 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *UserRepositoryImpl) CreateUser(user *models.User) (*models.User, error) {
-	const query = "INSERT INTO users (location, is_active, phone, radius, last_order_received, created_at, updated_at) VALUES (ST_SetSRID(ST_MakePoint($1, $2), 4326), $3, $4, $5, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, last_order_received, created_at, updated_at"
-	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	const query = "INSERT INTO users (location, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at) VALUES (ST_SetSRID(ST_MakePoint($1, $2), 4326), $3, $4, $5, $6, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at"
+	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	fmt.Printf("Created User: %v\n", user)
 	return user, err
 }
 
 func (r *UserRepositoryImpl) GetUser(id int) (*models.User, error) {
 	user := &models.User{}
-	err := r.db.QueryRow("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, last_order_received, created_at, updated_at FROM users WHERE id = $1", id).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at FROM users WHERE id = $1", id).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	// Return a custom error if the user is not found so that the service or handler can handle it.
 	// In this case we want to return a 404 status code
 	if err == sql.ErrNoRows {
@@ -55,7 +57,7 @@ func (r *UserRepositoryImpl) GetUser(id int) (*models.User, error) {
 }
 
 func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
-	rows, err := r.db.Query("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, last_order_received, created_at, updated_at FROM users")
+	rows, err := r.db.Query("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +66,7 @@ func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
 	users := []*models.User{}
 	for rows.Next() {
 		user := &models.User{}
-		err := rows.Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -79,8 +81,8 @@ func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
 }
 
 func (r *UserRepositoryImpl) UpdateUser(user *models.User) (*models.User, error) {
-	const query = "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326), is_active = $3, phone = $4, radius = $5, last_order_received = $6, updated_at = CLOCK_TIMESTAMP() WHERE id = $7 RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, last_order_received, created_at, updated_at"
-	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.LastOrderReceived, user.ID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	const query = "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326), is_active = $3, phone = $4, radius = $5, fcm_token= $6, last_order_received = $6, updated_at = CLOCK_TIMESTAMP() WHERE id = $7 RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at"
+	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.LastOrderReceived, user.ID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 
