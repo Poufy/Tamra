@@ -30,6 +30,17 @@ func NewUserHandler(userService *services.UserService, validator Validator, logg
 	return &UserHandler{userService: userService, validator: validator, logger: logger}
 }
 
+// CreateUser godoc
+//	@Summary		Create a user
+//	@Description	Create a user
+//	@Tags			users
+//	@Accept		json
+//	@Produce		json
+//	@Param			user	body	models.CreateUserRequest	true	"User to be created"
+//	@Success		201	{object}	models.UserResponse
+//	@Failure		400	{string}	string	"invalid request body"
+//	@Failure		500	{string}	string	"failed to create user"
+//	@Router			/users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	createUserRequest := &models.CreateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(createUserRequest)
@@ -44,6 +55,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.WithError(err).Error("invalid request body")
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid request body")
 		return
 	}
 
@@ -69,6 +81,17 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userResponse)
 }
 
+// GetUser godoc
+//	@Summary		Get a user
+//	@Description	Get a user
+//	@Tags			users
+//	@Produce		json
+//	@Param			id	path	int	true	"User ID"
+//	@Success		200	{object}	models.UserResponse
+//	@Failure		400	{string}	string	"invalid user ID"
+//	@Failure		404	{string}	string	"user not found"
+//	@Failure		500	{string}	string	"failed to get user"
+//	@Router			/users/{id} [get]
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -104,6 +127,15 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userResponse)
 }
 
+// GetUsers godoc
+//	@Summary		Get all users
+//	@Description	Get all users
+//	@Tags			users
+//	@Produce		json
+//	@Success		200	{array}		models.UserResponse
+//	@Failure		404	{string}	string	"users not found"
+//	@Failure		500	{string}	string	"failed to get users"
+//	@Router			/users [get]
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.userService.GetUsers()
 	if err != nil {
@@ -126,6 +158,21 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(userResponses)
 }
+
+// UpdateUser godoc
+// @Summary     Update a user
+// @Description Update a user
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       id      path    int     true        "User ID"
+// @Param       user    body    models.UpdateUserRequest   true        "User data to be updated"
+// @Success     200     {object}    models.UserResponse
+// @Failure     400     {string}    string  "invalid user ID"
+// @Failure     400     {string}    string  "invalid request body"
+// @Failure     500     {string}    string  "failed to decode request body"
+// @Failure     500     {string}    string  "failed to update user"
+// @Router      /users/{id} [put]
 
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
@@ -174,6 +221,15 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userResponse)
 }
 
+// DeleteUser godoc
+// @Summary     Delete a user
+// @Description Delete a user
+// @Tags        users
+// @Param       id      path    int     true        "User ID"
+// @Success     200     {string}    string  "user deleted"
+// @Failure     400     {string}    string  "invalid user ID"
+// @Failure     500     {string}    string  "failed to delete user"
+// @Router      /users/{id} [delete]
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)

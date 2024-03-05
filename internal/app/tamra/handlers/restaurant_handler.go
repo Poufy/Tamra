@@ -24,6 +24,17 @@ func NewRestaurantHandler(restaurantService *services.RestaurantService, validat
 	return &RestaurantHandler{restaurantService: restaurantService, validator: validator, logger: logger}
 }
 
+// CreateRestaurant godoc
+// @Summary Create a new restaurant
+// @Description Create a new restaurant with the given request body
+// @Tags restaurants
+// @Accept json
+// @Produce json
+// @Param request body models.CreateRestaurantRequest true "Create Restaurant Request"
+// @Success 201 {object} models.Restaurant "Created Restaurant"
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Failed to create restaurant"
+// @Router /restaurants [post]
 func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
 	createRestaurantRequest := &models.CreateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(createRestaurantRequest)
@@ -38,6 +49,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		h.logger.WithError(err).Error("invalid request body")
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid request body")
 		return
 	}
 
@@ -58,6 +70,15 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(createdRestaurant)
 }
 
+// GetRestaurants godoc
+// @Summary Get all restaurants
+// @Description Get a list of all restaurants
+// @Tags restaurants
+// @Produce json
+// @Success 200 {array} models.Restaurant
+// @Failure 404 {string} string "Restaurants not found"
+// @Failure 500 {string} string "Failed to get restaurants"
+// @Router /restaurants [get]
 func (h *RestaurantHandler) GetRestaurants(w http.ResponseWriter, r *http.Request) {
 	restaurants, err := h.restaurantService.GetRestaurants()
 	if err != nil {
@@ -76,6 +97,17 @@ func (h *RestaurantHandler) GetRestaurants(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(restaurants)
 }
 
+// GetRestaurant godoc
+// @Summary Get a restaurant
+// @Description Get a restaurant
+// @Tags restaurants
+// @Produce json
+// @Param id path int true "Restaurant ID"
+// @Success 200 {object} models.Restaurant
+// @Failure 400 {string} string "Invalid restaurant ID"
+// @Failure 404 {string} string "Restaurant not found"
+// @Failure 500 {string} string "Failed to get restaurant"
+// @Router /restaurants/{id} [get]
 func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -105,6 +137,19 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(restaurant)
 }
 
+// UpdateRestaurant godoc
+// @Summary Update a restaurant
+// @Description Update a restaurant with the given request body
+// @Tags restaurants
+// @Accept json
+// @Produce json
+// @Param id path int true "Restaurant ID"
+// @Param restaurant body models.UpdateRestaurantRequest true "Update Restaurant Request"
+// @Success 200 {object} models.Restaurant "Updated Restaurant"
+// @Failure 400 {string} string "Invalid restaurant ID"
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Failed to update restaurant"
+// @Router /restaurants/{id} [patch]
 func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -129,6 +174,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		h.logger.WithError(err).Error("invalid request body")
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid request body")
 		return
 	}
 
@@ -147,6 +193,16 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(updatedRestaurant)
 }
 
+// DeleteRestaurant godoc
+// @Summary Delete a restaurant
+// @Description Delete a restaurant
+// @Tags restaurants
+// @Param id path int true "Restaurant ID"
+// @Success 204 {string} string "No Content"
+// @Failure 400 {string} string "Invalid restaurant ID"
+// @Failure 404 {string} string "Restaurant not found"
+// @Failure 500 {string} string "Failed to delete restaurant"
+// @Router /restaurants/{id} [delete]
 func (h *RestaurantHandler) DeleteRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)

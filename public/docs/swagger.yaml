@@ -1,0 +1,562 @@
+basePath: /api/v1
+definitions:
+  models.CreateOrderRequest:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      restaurant_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - code
+    - restaurant_id
+    - user_id
+    type: object
+  models.CreateRestaurantRequest:
+    properties:
+      image_url:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+    required:
+    - image_url
+    - latitude
+    - longitude
+    - name
+    type: object
+  models.CreateUserRequest:
+    properties:
+      fcm_token:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      phone:
+        type: string
+      radius:
+        type: integer
+    required:
+    - fcm_token
+    - latitude
+    - longitude
+    - phone
+    - radius
+    type: object
+  models.Order:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      restaurant_id:
+        type: integer
+      state:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - code
+    - restaurant_id
+    - state
+    - user_id
+    type: object
+  models.Restaurant:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - image_url
+    - latitude
+    - longitude
+    - name
+    type: object
+  models.UpdateOrderRequest:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      restaurant_id:
+        type: integer
+      state:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - code
+    - restaurant_id
+    - state
+    - user_id
+    type: object
+  models.UpdateRestaurantRequest:
+    properties:
+      image_url:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+    required:
+    - image_url
+    - latitude
+    - longitude
+    - name
+    type: object
+  models.UserResponse:
+    properties:
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_order_received:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      phone:
+        type: string
+      radius:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API for the Tamra application
+  title: Tamra API
+  version: "1"
+paths:
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Orders
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "404":
+          description: order not found
+          schema:
+            type: string
+        "500":
+          description: failed to get orders
+          schema:
+            type: string
+      summary: Get all orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create a new order with the given request body
+      parameters:
+      - description: Create Order Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created Order
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create order
+          schema:
+            type: string
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: invalid order ID
+          schema:
+            type: string
+        "500":
+          description: failed to delete order
+          schema:
+            type: string
+      summary: Delete a order
+      tags:
+      - orders
+    get:
+      consumes:
+      - application/json
+      description: Get a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: invalid order ID
+          schema:
+            type: string
+        "404":
+          description: order not found
+          schema:
+            type: string
+        "500":
+          description: failed to get order
+          schema:
+            type: string
+      summary: Get a order
+      tags:
+      - orders
+    put:
+      consumes:
+      - application/json
+      description: Update a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Order data to be updated
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated Order
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: failed to update order
+          schema:
+            type: string
+      summary: Update a order
+      tags:
+      - orders
+  /restaurants:
+    get:
+      description: Get a list of all restaurants
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Restaurant'
+            type: array
+        "404":
+          description: Restaurants not found
+          schema:
+            type: string
+        "500":
+          description: Failed to get restaurants
+          schema:
+            type: string
+      summary: Get all restaurants
+      tags:
+      - restaurants
+    post:
+      consumes:
+      - application/json
+      description: Create a new restaurant with the given request body
+      parameters:
+      - description: Create Restaurant Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created Restaurant
+          schema:
+            $ref: '#/definitions/models.Restaurant'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create restaurant
+          schema:
+            type: string
+      summary: Create a new restaurant
+      tags:
+      - restaurants
+  /restaurants/{id}:
+    delete:
+      description: Delete a restaurant
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Invalid restaurant ID
+          schema:
+            type: string
+        "404":
+          description: Restaurant not found
+          schema:
+            type: string
+        "500":
+          description: Failed to delete restaurant
+          schema:
+            type: string
+      summary: Delete a restaurant
+      tags:
+      - restaurants
+    get:
+      description: Get a restaurant
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Restaurant'
+        "400":
+          description: Invalid restaurant ID
+          schema:
+            type: string
+        "404":
+          description: Restaurant not found
+          schema:
+            type: string
+        "500":
+          description: Failed to get restaurant
+          schema:
+            type: string
+      summary: Get a restaurant
+      tags:
+      - restaurants
+    patch:
+      consumes:
+      - application/json
+      description: Update a restaurant with the given request body
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Restaurant Request
+        in: body
+        name: restaurant
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated Restaurant
+          schema:
+            $ref: '#/definitions/models.Restaurant'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update restaurant
+          schema:
+            type: string
+      summary: Update a restaurant
+      tags:
+      - restaurants
+  /users:
+    get:
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "404":
+          description: users not found
+          schema:
+            type: string
+        "500":
+          description: failed to get users
+          schema:
+            type: string
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a user
+      parameters:
+      - description: User to be created
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: failed to create user
+          schema:
+            type: string
+      summary: Create a user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: user deleted
+          schema:
+            type: string
+        "400":
+          description: invalid user ID
+          schema:
+            type: string
+        "500":
+          description: failed to delete user
+          schema:
+            type: string
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      description: Get a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: invalid user ID
+          schema:
+            type: string
+        "404":
+          description: user not found
+          schema:
+            type: string
+        "500":
+          description: failed to get user
+          schema:
+            type: string
+      summary: Get a user
+      tags:
+      - users
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"
