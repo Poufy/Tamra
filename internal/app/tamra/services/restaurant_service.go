@@ -6,9 +6,6 @@ import (
 	"fmt"
 )
 
-// UserRepository is an interface for the user repository. Since it is a pointer to the implementation of the interface
-// we shouldn't import it as a pointer to the interface, since when you pass an interface as a parameter, it is already a pointer to the underlying implementation.
-
 type RestaurantService struct {
 	restaurantRepository repositories.RestaurantRepository
 }

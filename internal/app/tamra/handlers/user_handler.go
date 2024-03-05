@@ -52,6 +52,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	user := utils.MapCreateUserRequestToUser(createUserRequest)
 
+	h.logger.Infof("user to be created: %+v. Token: %s", user, user.FCMToken)
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to create user")

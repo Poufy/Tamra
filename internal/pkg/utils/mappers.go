@@ -14,6 +14,7 @@ func MapCreateUserRequestToUser(req *models.CreateUserRequest) *models.User {
 		Latitude:  req.Latitude,
 		Phone:     req.Phone,
 		Radius:    req.Radius,
+		FCMToken:  req.FCMToken,
 	}
 }
 
@@ -46,6 +47,7 @@ func MapUpdateUserRequestToUser(req *models.UpdateUserRequest) *models.User {
 		IsActive:  req.IsActive,
 		Phone:     req.Phone,
 		Radius:    req.Radius,
+		FCMToken:  req.FCMToken,
 	}
 }
 
@@ -97,7 +99,6 @@ func MapCreateOrderRequestToOrder(req *models.CreateOrderRequest) *models.Order 
 		RestaurantID: req.RestaurantID,
 		Code:         req.Code,
 		Description:  req.Description,
-		State:        req.State,
 	}
 }
 
