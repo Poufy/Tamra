@@ -33,12 +33,15 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(db)
 	restaurantRepository := repositories.NewRestaurantRepository(db)
+	orderRepository := repositories.NewOrderRepository(db)
 
 	userService := services.NewUserService(userRepository)
 	restaurantService := services.NewRestaurantService(restaurantRepository)
+	orderService := services.NewOrderService(orderRepository)
 
 	userHandler := handlers.NewUserHandler(userService, validator, logger)
 	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger)
+	orderHandler := handlers.NewOrderHandler(orderService, validator, logger)
 
 	// Use chi as the router
 	r := chi.NewRouter()
@@ -58,6 +61,14 @@ func main() {
 		r.Get("/{id}", restaurantHandler.GetRestaurant)
 		r.Patch("/{id}", restaurantHandler.UpdateRestaurant)
 		r.Delete("/{id}", restaurantHandler.DeleteRestaurant)
+	})
+
+	r.Route("/orders", func(r chi.Router) {
+		r.Post("/", orderHandler.CreateOrder)
+		r.Get("/", orderHandler.GetOrders)
+		r.Get("/{id}", orderHandler.GetOrder)
+		r.Patch("/{id}", orderHandler.UpdateOrder)
+		r.Delete("/{id}", orderHandler.DeleteOrder)
 	})
 
 	// Start the server with the port from the configuration and cast the port to a string

@@ -1,10 +1,10 @@
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
-    code VARCHAR(255) UNIQUE,
+    code VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
-    state VARCHAR(100),
-    restaurant_id INT REFERENCES restaurants(id) ,
-    user_id INT REFERENCES users(id),
+    state VARCHAR(100) NOT NULL DEFAULT 'PENDING',
+    restaurant_id INT REFERENCES restaurants(id) NOT NULL,
+    user_id INT REFERENCES users(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
