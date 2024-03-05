@@ -113,6 +113,10 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "users not found")
 			return
 		}
+
+		h.logger.WithError(err).Error("failed to get users")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get users")
 	}
 
 	h.logger.Info("users retrieved.")

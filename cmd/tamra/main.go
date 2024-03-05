@@ -31,14 +31,14 @@ func main() {
 	// Get the logger
 	logger := utils.NewLogger(config.LogLevel)
 
-	// Create the user repository
 	userRepository := repositories.NewUserRepository(db)
+	restaurantRepository := repositories.NewRestaurantRepository(db)
 
-	// Create the user service
 	userService := services.NewUserService(userRepository)
+	restaurantService := services.NewRestaurantService(restaurantRepository)
 
-	// Create the user handler
 	userHandler := handlers.NewUserHandler(userService, validator, logger)
+	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger)
 
 	// Use chi as the router
 	r := chi.NewRouter()
@@ -50,6 +50,14 @@ func main() {
 		r.Get("/{id}", userHandler.GetUser)
 		r.Patch("/{id}", userHandler.UpdateUser)
 		r.Delete("/{id}", userHandler.DeleteUser)
+	})
+
+	r.Route("/restaurants", func(r chi.Router) {
+		r.Post("/", restaurantHandler.CreateRestaurant)
+		r.Get("/", restaurantHandler.GetRestaurants)
+		r.Get("/{id}", restaurantHandler.GetRestaurant)
+		r.Patch("/{id}", restaurantHandler.UpdateRestaurant)
+		r.Delete("/{id}", restaurantHandler.DeleteRestaurant)
 	})
 
 	// Start the server with the port from the configuration and cast the port to a string
