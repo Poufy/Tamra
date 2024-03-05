@@ -21,6 +21,6 @@ migrate-down:
 
 swagger:
 	@echo "Generating Swagger documentation..."
-	rm -rf public/docs && swag init -d $(MAIN_DIR),$(HANDLERS_DIR) -g main.go --parseInternal --parseDependency -o public/docs
+	swag init -d $(MAIN_DIR),$(HANDLERS_DIR) -g main.go --parseInternal --parseDependency -o docs
 
 .PHONY: migrate-up migrate-down docker-up docker-down swagger
