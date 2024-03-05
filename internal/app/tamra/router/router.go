@@ -14,8 +14,8 @@ func NewRouter(userHandler *handlers.UserHandler, restaurantHandler *handlers.Re
 	r.Mount("/users", userRoutes(userHandler))
 	r.Mount("/restaurants", restaurantRoutes(restaurantHandler))
 	r.Mount("/orders", orderRoutes(orderHandler))
-	r.Mount("/public", staticContentRoutes())
-	r.Mount("/swagger", swaggerDocsRoutes())
+	r.Mount("/docs", docsServeRoute())
+	r.Mount("/swagger", swaggerRoute())
 
 	return r
 }
@@ -51,21 +51,21 @@ func orderRoutes(orderHandler *handlers.OrderHandler) chi.Router {
 	return r
 }
 
-func staticContentRoutes() chi.Router {
+func docsServeRoute() chi.Router {
 	r := chi.NewRouter()
 	// Currently we only have the swagger documentation as static content
 	// Use the relative path to the docs directory since it is not in the same directory as the main.go file
-	fileServer := http.FileServer(http.Dir("../../public"))
+	fileServer := http.FileServer(http.Dir("../../docs"))
 
 	// Strip the /docs prefix from the URL before serving the files, since the resulting URL shuld be the file name
-	r.Handle("/*", http.StripPrefix("/public", fileServer))
+	r.Handle("/*", http.StripPrefix("/docs", fileServer))
 	return r
 }
 
-func swaggerDocsRoutes() chi.Router {
+func swaggerRoute() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/*", httpSwagger.Handler(
-		httpSwagger.URL("/public/docs/swagger.json"),
+		httpSwagger.URL("/docs/swagger.json"),
 	))
 	return r
 }
