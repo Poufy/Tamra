@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 	// "github.com/go-chi/chi/v5/middleware"
 )
 
@@ -50,10 +52,14 @@ func main() {
 	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger)
 	orderHandler := handlers.NewOrderHandler(orderService, validator, logger)
 
-	r := router.NewRouter(userHandler, restaurantHandler, orderHandler)
+	// Create a parent router
+	r := chi.NewRouter()
 
-	// TODO: Why can we call the api without including /api/v1 in the URL?
-	r.Mount("/api/v1", r)
+	// Create a new router and pass the handlers to it
+	apiRouter := router.NewRouter(userHandler, restaurantHandler, orderHandler)
+
+	// Mount the subrouter to the parent router
+	r.Mount("/api/v1", apiRouter)
 
 	// Start the server with the port from the configuration and cast the port to a string
 	strPort := ":" + strconv.Itoa(config.Port)
