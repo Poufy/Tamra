@@ -74,6 +74,24 @@ func MapRestaurantToRestaurantResponse(restaurant *models.Restaurant) *models.Re
 	}
 }
 
+func MapRestaurantsToRestaurantResponses(restaurants []*models.Restaurant) []*models.RestaurantResponse {
+	// Pre-allocate the array to the correct length to avoid unnecessary allocations when appending
+	restaurantResponses := make([]*models.RestaurantResponse, len(restaurants))
+	for i, restaurant := range restaurants {
+		restaurantResponses[i] = MapRestaurantToRestaurantResponse(restaurant)
+	}
+	return restaurantResponses
+}
+
+func MapUpdateRestaurantRequestToRestaurant(req *models.UpdateRestaurantRequest) *models.Restaurant {
+	return &models.Restaurant{
+		Longitude: req.Longitude,
+		Latitude:  req.Latitude,
+		ImageURL:  req.ImageURL,
+		Name:      req.Name,
+	}
+}
+
 // MapCreateOrderRequestToOrder maps a CreateOrderRequest to a Order.
 func MapCreateOrderRequestToOrder(req *models.CreateOrderRequest) *models.Order {
 	return &models.Order{
@@ -81,7 +99,6 @@ func MapCreateOrderRequestToOrder(req *models.CreateOrderRequest) *models.Order 
 		RestaurantID: req.RestaurantID,
 		Code:         req.Code,
 		Description:  req.Description,
-		State:        req.State,
 	}
 }
 
@@ -96,5 +113,24 @@ func MapOrderToOrderResponse(order *models.Order) *models.OrderResponse {
 		State:        order.State,
 		CreatedAt:    order.CreatedAt,
 		UpdatedAt:    order.UpdatedAt,
+	}
+}
+
+func MapOrdersToOrderResponses(orders []*models.Order) []*models.OrderResponse {
+	// Pre-allocate the array to the correct length to avoid unnecessary allocations when appending
+	orderResponses := make([]*models.OrderResponse, len(orders))
+	for i, order := range orders {
+		orderResponses[i] = MapOrderToOrderResponse(order)
+	}
+	return orderResponses
+}
+
+func MapUpdateOrderRequestToOrder(req *models.UpdateOrderRequest) *models.Order {
+	return &models.Order{
+		UserID:       req.UserID,
+		RestaurantID: req.RestaurantID,
+		Code:         req.Code,
+		Description:  req.Description,
+		State:        req.State,
 	}
 }
