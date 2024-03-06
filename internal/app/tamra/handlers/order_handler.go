@@ -226,3 +226,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
+
+}

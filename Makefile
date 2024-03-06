@@ -23,4 +23,8 @@ swagger:
 	@echo "Generating Swagger documentation..."
 	swag init -d $(MAIN_DIR),$(HANDLERS_DIR) -g main.go --parseInternal --parseDependency -o docs
 
-.PHONY: migrate-up migrate-down docker-up docker-down swagger
+local:
+	@echo "Running the application locally..."
+	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable -firebase-config=firebaseConfig.json
+
+.PHONY: migrate-up migrate-down docker-up docker-down swagger local

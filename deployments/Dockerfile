@@ -6,26 +6,19 @@ WORKDIR /app
 # Set the environment variable for go. This is to disable the version control system.
 #? This is to avoid the error: error obtaining VCS status: exit status 128. Use -buildvcs=false to disable VCS stamping.
 # RUN go env -w GOFLAGS="-buildvcs=false"
+COPY . .
 
-COPY go.mod go.sum ./ 
+# COPY go.mod go.sum ./ 
 RUN go mod download && go mod verify
 
 # Copy the application's code
-COPY . .
 # User air for hot reload
 # RUN go install github.com/cosmtrek/air@latest
 
-# Copy go.mod and go.sum and download dependencies
-# TODO: copy go.sum as well
-
-# Set the working directory to the location of main.go
-WORKDIR /app/cmd/tamra
-
-RUN pwd
-
 # Build the application
-RUN go build -o tamra
+# RUN go build -o ./bin/tamra ./cmd/tamra/
 
 # Command to run the executable
-CMD ["./tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug"]
+CMD ["go", "run", "cmd/tamra/main.go", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug", "-firebase-config=firebaseConfig.json"]
+# ENTRYPOINT ["./bin/tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug", "-firebase-config=firebaseConfig.json"]
 # CMD ["air", "-c", ".air.toml"]

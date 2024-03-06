@@ -80,6 +80,8 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 // @Failure 500 {string} string "Failed to get restaurants"
 // @Router /restaurants [get]
 func (h *RestaurantHandler) GetRestaurants(w http.ResponseWriter, r *http.Request) {
+	// Print the context with the request
+	h.logger.Infof("Context: %v", r.Context())
 	restaurants, err := h.restaurantService.GetRestaurants()
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
