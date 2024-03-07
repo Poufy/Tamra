@@ -70,18 +70,20 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(createdRestaurant)
 }
 
+// Get all restaurants. requires bearer token that we will pass in the header
 // GetRestaurants godoc
 // @Summary Get all restaurants
-// @Description Get a list of all restaurants
+// @Description Get all restaurants
 // @Tags restaurants
 // @Produce json
 // @Success 200 {array} models.Restaurant
 // @Failure 404 {string} string "Restaurants not found"
 // @Failure 500 {string} string "Failed to get restaurants"
+// @Security jwt
 // @Router /restaurants [get]
 func (h *RestaurantHandler) GetRestaurants(w http.ResponseWriter, r *http.Request) {
 	// Print the context with the request
-	h.logger.Infof("Context: %v", r.Context())
+	h.logger.Infof("UID in context: %s", r.Context().Value("UID"))
 	restaurants, err := h.restaurantService.GetRestaurants()
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {

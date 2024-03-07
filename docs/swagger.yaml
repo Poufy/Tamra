@@ -2,18 +2,8 @@ basePath: /api/v1
 definitions:
   models.CreateOrderRequest:
     properties:
-      code:
-        type: string
       description:
         type: string
-      restaurant_id:
-        type: integer
-      user_id:
-        type: integer
-    required:
-    - code
-    - restaurant_id
-    - user_id
     type: object
   models.CreateRestaurantRequest:
     properties:
@@ -305,7 +295,7 @@ paths:
       - orders
   /restaurants:
     get:
-      description: Get a list of all restaurants
+      description: Get all restaurants
       produces:
       - application/json
       responses:
@@ -323,6 +313,8 @@ paths:
           description: Failed to get restaurants
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Get all restaurants
       tags:
       - restaurants
@@ -555,8 +547,13 @@ paths:
       summary: Get a user
       tags:
       - users
-produces:
-- application/json
 schemes:
 - http
+- https
+securityDefinitions:
+  jwt:
+    description: Bearer token
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

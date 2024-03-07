@@ -4,16 +4,16 @@ import (
 	"Tamra/internal/app/tamra/handlers"
 	"Tamra/internal/app/tamra/middleware"
 	"Tamra/internal/app/tamra/repositories"
-	"Tamra/internal/app/tamra/router"
+	"Tamra/internal/app/tamra/routes"
 	"Tamra/internal/app/tamra/services"
 	"Tamra/internal/pkg/utils"
+
 	"Tamra/internal/pkg/utils/firebase"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/sirupsen/logrus"
 	// "github.com/go-chi/chi/v5/middleware"
 )
 
@@ -22,7 +22,13 @@ import (
 // @description This is the API for the Tamra application
 // @host localhost:8080
 // @BasePath /api/v1
-// @schemes http
+// @schemes http https
+// this is openapi2.0 so bearer token is not supported. so we use apikey and name it jwt
+// @securityDefinitions.apiKey jwt
+// @in header
+// @name Authorization
+// @description Bearer token
+// @tokenUrl http://localhost:8080/api/v1/users/login
 // @produce json
 // @consumes json
 func main() {
@@ -39,13 +45,6 @@ func main() {
 
 	fmt.Println("Configuration values before initializing firebase auth", config.FirebaseConfig)
 	firebaseAuth, err := firebase.NewFirebaseAuth(config.FirebaseConfig)
-
-	if err != nil {
-		fmt.Println("Error initializing firebase auth", err)
-		panic(err)
-	}
-
-	logrus.Infof("Firebase auth: %v", firebaseAuth)
 
 	// Get the validator
 	validator := utils.NewValidator()
@@ -67,19 +66,27 @@ func main() {
 
 	authMiddleware := middleware.AuthMiddleware(firebaseAuth, logger)
 
-	// Create a parent router
+	userRouter := routes.NewUserRouter(userHandler, authMiddleware, logger)
+	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, authMiddleware, logger)
+	orderRouter := routes.NewOrderRouter(orderHandler, authMiddleware, logger)
+	docsRouter := routes.NewDocsRouter(logger)
+
+	// Create a new chi router
 	r := chi.NewRouter()
 
-	// Create a new router instance and inject the handlers, middleware and logger
-	routerInstance := router.NewRouter(userHandler, restaurantHandler, orderHandler, authMiddleware, logger)
-
-	tamraRouter := routerInstance.TamraRouter()
+	r.Mount("/users", userRouter.GetRouter())
+	r.Mount("/restaurants", restaurantRouter.GetRouter())
+	r.Mount("/orders", orderRouter.GetRouter())
+	r.Mount("/docs", docsRouter.GetRouter())
 
 	// Mount the subrouter to the parent router
-	r.Mount("/api/v1", tamraRouter)
+	// We create a new router for the versioned API and mount the subrouter to it
+	// if we were to use the same router r like r.Mount("/api/v1", r), routers like "/users" would still be accessible
+	versionedRouter := chi.NewRouter()
+	versionedRouter.Mount("/api/v1", r)
 
 	// Start the server with the port from the configuration and cast the port to a string
 	strPort := ":" + strconv.Itoa(config.Port)
 
-	http.ListenAndServe(strPort, r)
+	http.ListenAndServe(strPort, versionedRouter)
 }

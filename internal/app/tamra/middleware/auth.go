@@ -17,6 +17,7 @@ func AuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) func(h
 			token := r.Header.Get("Authorization")
 			if token == "" {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				logger.Warn("No auth token provided.")
 				return
 			}
 

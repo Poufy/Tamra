@@ -19,6 +19,6 @@ RUN go mod download && go mod verify
 # RUN go build -o ./bin/tamra ./cmd/tamra/
 
 # Command to run the executable
-CMD ["go", "run", "cmd/tamra/main.go", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug", "-firebase-config=firebaseConfig.json"]
+CMD ["go", "run", "cmd/tamra/main.go"]
 # ENTRYPOINT ["./bin/tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug", "-firebase-config=firebaseConfig.json"]
 # CMD ["air", "-c", ".air.toml"]

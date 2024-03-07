@@ -1,9 +1,7 @@
 {
-    "produces": [
-        "application/json"
-    ],
     "schemes": [
-        "http"
+        "http",
+        "https"
     ],
     "swagger": "2.0",
     "info": {
@@ -242,7 +240,12 @@
         },
         "/restaurants": {
             "get": {
-                "description": "Get a list of all restaurants",
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get all restaurants",
                 "produces": [
                     "application/json"
                 ],
@@ -625,23 +628,9 @@
     "definitions": {
         "models.CreateOrderRequest": {
             "type": "object",
-            "required": [
-                "code",
-                "restaurant_id",
-                "user_id"
-            ],
             "properties": {
-                "code": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
-                },
-                "restaurant_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -836,6 +825,14 @@
                     "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "jwt": {
+            "description": "Bearer token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

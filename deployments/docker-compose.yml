@@ -10,10 +10,10 @@ services:
     depends_on:
       - db
     environment:
-      - DB_CONNECTION_STRING="postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable"
+      - DB_CONNECTION_STRING=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable
       - PORT=8080
       - LOG_LEVEL=debug
-      - FIREBASE_CONFIG="fb.json"
+      - FIREBASE_CONFIG=firebaseConfig.json
     networks:
       - tamra-network
 

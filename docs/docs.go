@@ -5,9 +5,6 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
-    "produces": [
-        "application/json"
-    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -245,7 +242,12 @@ const docTemplate = `{
         },
         "/restaurants": {
             "get": {
-                "description": "Get a list of all restaurants",
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get all restaurants",
                 "produces": [
                     "application/json"
                 ],
@@ -628,23 +630,9 @@ const docTemplate = `{
     "definitions": {
         "models.CreateOrderRequest": {
             "type": "object",
-            "required": [
-                "code",
-                "restaurant_id",
-                "user_id"
-            ],
             "properties": {
-                "code": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
-                },
-                "restaurant_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -840,6 +828,14 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "jwt": {
+            "description": "Bearer token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -848,7 +844,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1",
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
-	Schemes:          []string{"http"},
+	Schemes:          []string{"http", "https"},
 	Title:            "Tamra API",
 	Description:      "This is the API for the Tamra application",
 	InfoInstanceName: "swagger",

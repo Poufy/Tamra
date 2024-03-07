@@ -10,6 +10,14 @@ docker-up:
 docker-down:
 	@echo "Stopping Docker containers..."
 	docker-compose -f $(DOCKER_COMPOSE_FILE) down
+
+docker-up-db:
+	@echo "Starting the database container..."
+	docker-compose -f $(DOCKER_COMPOSE_FILE) up db 
+
+docker-down-db:
+	@echo "Stopping the database container..."
+	docker-compose -f $(DOCKER_COMPOSE_FILE) down db
 	
 migrate-up:
 	@echo "Running migrations..."
@@ -27,4 +35,4 @@ local:
 	@echo "Running the application locally..."
 	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable -firebase-config=firebaseConfig.json
 
-.PHONY: migrate-up migrate-down docker-up docker-down swagger local
+.PHONY: migrate-up migrate-down docker-up docker-down swagger local docker-up-db docker-down-db
