@@ -8,9 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,6 +29,7 @@ func NewRestaurantHandler(restaurantService *services.RestaurantService, validat
 // @Accept json
 // @Produce json
 // @Param request body models.CreateRestaurantRequest true "Create Restaurant Request"
+// @Security jwt
 // @Success 201 {object} models.Restaurant "Created Restaurant"
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 500 {string} string "Failed to create restaurant"
@@ -57,6 +56,17 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	// The reason why we map to a Restaurant is because the service should not know about the request/response models
 	// It should be loosely coupled and only know about the domain models
 	restaurant := utils.MapCreateRestaurantRequestToRestaurant(createRestaurantRequest)
+	// Extract the user ID from the request context
+	userID, ok := r.Context().Value("UserID").(string)
+	if !ok {
+		h.logger.Error("Context", r.Context())
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
+	restaurant.UserID = userID
 
 	createdRestaurant, err := h.restaurantService.CreateRestaurant(restaurant)
 	if err != nil {
@@ -70,60 +80,28 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(createdRestaurant)
 }
 
-// Get all restaurants. requires bearer token that we will pass in the header
-// GetRestaurants godoc
-// @Summary Get all restaurants
-// @Description Get all restaurants
-// @Tags restaurants
-// @Produce json
-// @Success 200 {array} models.Restaurant
-// @Failure 404 {string} string "Restaurants not found"
-// @Failure 500 {string} string "Failed to get restaurants"
-// @Security jwt
-// @Router /restaurants [get]
-func (h *RestaurantHandler) GetRestaurants(w http.ResponseWriter, r *http.Request) {
-	// Print the context with the request
-	h.logger.Infof("UID in context: %s", r.Context().Value("UID"))
-	restaurants, err := h.restaurantService.GetRestaurants()
-	if err != nil {
-		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("restaurants not found")
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "restaurants not found")
-			return
-		}
-		h.logger.WithError(err).Error("failed to get restaurants")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to get restaurants")
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(restaurants)
-}
-
 // GetRestaurant godoc
 // @Summary Get a restaurant
-// @Description Get a restaurant
+// @Description Get a restaurant by the user ID
 // @Tags restaurants
 // @Produce json
-// @Param id path int true "Restaurant ID"
-// @Success 200 {object} models.Restaurant
-// @Failure 400 {string} string "Invalid restaurant ID"
+// @Security jwt
+// @Success 200 {object} models.Restaurant "Restaurant"
 // @Failure 404 {string} string "Restaurant not found"
 // @Failure 500 {string} string "Failed to get restaurant"
-// @Router /restaurants/{id} [get]
+// @Router /restaurants/me [get]
 func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	// Extract the user ID from the request context
+	userID := r.Context().Value("UserID").(string)
 
-	if err != nil {
-		h.logger.WithError(err).Error("invalid restaurant ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid restaurant ID")
+	if userID == "" {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
 		return
 	}
 
-	restaurant, err := h.restaurantService.GetRestaurant(id)
+	restaurant, err := h.restaurantService.GetRestaurant(userID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			h.logger.WithError(err).Error("restaurant not found")
@@ -147,26 +125,27 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 // @Tags restaurants
 // @Accept json
 // @Produce json
-// @Param id path int true "Restaurant ID"
-// @Param restaurant body models.UpdateRestaurantRequest true "Update Restaurant Request"
+// @Param request body models.UpdateRestaurantRequest true "Update Restaurant Request"
+// @Security jwt
 // @Success 200 {object} models.Restaurant "Updated Restaurant"
-// @Failure 400 {string} string "Invalid restaurant ID"
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 500 {string} string "Failed to update restaurant"
-// @Router /restaurants/{id} [patch]
+// @Router /restaurants/me [patch]
 func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	// Extract the user ID from the request context
+	h.logger.Infof("Context: %+v", r.Context())
+	userId, ok := r.Context().Value("UserID").(string)
 
-	if err != nil {
-		h.logger.WithError(err).Error("invalid restaurant ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid restaurant ID")
+	if !ok {
+		h.logger.Error("Context", r.Context())
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
 		return
 	}
 
 	updateRestaurantRequest := &models.UpdateRestaurantRequest{}
-	err = json.NewDecoder(r.Body).Decode(updateRestaurantRequest)
+	err := json.NewDecoder(r.Body).Decode(updateRestaurantRequest)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to decode request body")
 		w.WriteHeader(http.StatusBadRequest)
@@ -183,7 +162,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	}
 
 	restaurant := utils.MapUpdateRestaurantRequestToRestaurant(updateRestaurantRequest)
-	restaurant.ID = id
+	restaurant.UserID = userId
 
 	updatedRestaurant, err := h.restaurantService.UpdateRestaurant(restaurant)
 	if err != nil {
@@ -195,42 +174,4 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updatedRestaurant)
-}
-
-// DeleteRestaurant godoc
-// @Summary Delete a restaurant
-// @Description Delete a restaurant
-// @Tags restaurants
-// @Param id path int true "Restaurant ID"
-// @Success 204 {string} string "No Content"
-// @Failure 400 {string} string "Invalid restaurant ID"
-// @Failure 404 {string} string "Restaurant not found"
-// @Failure 500 {string} string "Failed to delete restaurant"
-// @Router /restaurants/{id} [delete]
-func (h *RestaurantHandler) DeleteRestaurant(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-
-	if err != nil {
-		h.logger.WithError(err).Error("invalid restaurant ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid restaurant ID")
-		return
-	}
-
-	err = h.restaurantService.DeleteRestaurant(id)
-	if err != nil {
-		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("restaurant not found")
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "restaurant not found")
-			return
-		}
-		h.logger.WithError(err).Error("failed to delete restaurant")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to delete restaurant")
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }

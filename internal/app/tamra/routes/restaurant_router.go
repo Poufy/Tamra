@@ -25,9 +25,8 @@ func (router *RestaurantRouter) GetRouter() chi.Router {
 	// It will also append the UUID of the user to the request context so we can use it in the handler
 	r.Use(router.authMiddlware)
 	r.Post("/", router.restaurantHandler.CreateRestaurant)
-	r.Get("/", router.restaurantHandler.GetRestaurants)
-	r.Get("/{id}", router.restaurantHandler.GetRestaurant)
-	r.Patch("/{id}", router.restaurantHandler.UpdateRestaurant)
+	r.Get("/me", router.restaurantHandler.GetRestaurant)
+	r.Patch("/me", router.restaurantHandler.UpdateRestaurant)
 	return r
 }
 

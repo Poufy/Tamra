@@ -23,22 +23,13 @@ func (s *RestaurantService) CreateRestaurant(restaurant *models.Restaurant) (*mo
 	return createdRestaurant, nil
 }
 
-func (s *RestaurantService) GetRestaurant(id int) (*models.Restaurant, error) {
-	restaurant, err := s.restaurantRepository.GetRestaurant(id)
+func (s *RestaurantService) GetRestaurant(userId string) (*models.Restaurant, error) {
+	restaurant, err := s.restaurantRepository.GetRestaurant(userId)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
 		return nil, fmt.Errorf("failed to get restaurant: %w", err)
 	}
 	return restaurant, nil
-}
-
-func (s *RestaurantService) GetRestaurants() ([]*models.Restaurant, error) {
-	restaurants, err := s.restaurantRepository.GetRestaurants()
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return nil, fmt.Errorf("failed to get restaurants: %w", err)
-	}
-	return restaurants, nil
 }
 
 func (s *RestaurantService) UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
@@ -48,13 +39,4 @@ func (s *RestaurantService) UpdateRestaurant(restaurant *models.Restaurant) (*mo
 		return nil, fmt.Errorf("failed to update restaurant: %w", err)
 	}
 	return updatedRestaurant, nil
-}
-
-func (s *RestaurantService) DeleteRestaurant(id int) error {
-	err := s.restaurantRepository.DeleteRestaurant(id)
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to delete restaurant: %w", err)
-	}
-	return nil
 }

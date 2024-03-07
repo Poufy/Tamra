@@ -33,7 +33,7 @@ func AuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) func(h
 			// fmt.Printf("Token: %v\n", tokenWithClaims)
 			logger.Infof("Passed auth token: %s.", token)
 
-			ctx := context.WithValue(r.Context(), "UID", "1234")
+			ctx := context.WithValue(r.Context(), "UserID", "1234")
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))

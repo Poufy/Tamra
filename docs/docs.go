@@ -241,45 +241,12 @@ const docTemplate = `{
             }
         },
         "/restaurants": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "jwt": []
                     }
                 ],
-                "description": "Get all restaurants",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Get all restaurants",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Restaurant"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Restaurants not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to get restaurants",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
                 "description": "Create a new restaurant with the given request body",
                 "consumes": [
                     "application/json"
@@ -324,9 +291,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/restaurants/{id}": {
+        "/restaurants/me": {
             "get": {
-                "description": "Get a restaurant",
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get a restaurant by the user ID",
                 "produces": [
                     "application/json"
                 ],
@@ -334,26 +306,11 @@ const docTemplate = `{
                     "restaurants"
                 ],
                 "summary": "Get a restaurant",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Restaurant",
                         "schema": {
                             "$ref": "#/definitions/models.Restaurant"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid restaurant ID",
-                        "schema": {
-                            "type": "string"
                         }
                     },
                     "404": {
@@ -370,49 +327,12 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
-                "description": "Delete a restaurant",
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Delete a restaurant",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid restaurant ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Restaurant not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to delete restaurant",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "patch": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Update a restaurant with the given request body",
                 "consumes": [
                     "application/json"
@@ -426,15 +346,8 @@ const docTemplate = `{
                 "summary": "Update a restaurant",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Update Restaurant Request",
-                        "name": "restaurant",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -749,6 +662,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
