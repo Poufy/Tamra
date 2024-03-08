@@ -14,6 +14,7 @@ services:
       - PORT=8080
       - LOG_LEVEL=debug
       - FIREBASE_CONFIG=firebaseConfig.json
+      - RESTAURANT_LOGOS_BUCKET=dev-tamra-restaurant-logos
     networks:
       - tamra-network
 

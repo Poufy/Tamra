@@ -16,10 +16,11 @@ type RestaurantHandler struct {
 	restaurantService *services.RestaurantService
 	validator         Validator
 	logger            logrus.FieldLogger
+	config            utils.Config
 }
 
-func NewRestaurantHandler(restaurantService *services.RestaurantService, validator Validator, logger logrus.FieldLogger) *RestaurantHandler {
-	return &RestaurantHandler{restaurantService: restaurantService, validator: validator, logger: logger}
+func NewRestaurantHandler(restaurantService *services.RestaurantService, validator Validator, logger logrus.FieldLogger, config utils.Config) *RestaurantHandler {
+	return &RestaurantHandler{restaurantService: restaurantService, validator: validator, logger: logger, config: config}
 }
 
 // CreateRestaurant godoc
@@ -174,4 +175,43 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updatedRestaurant)
+}
+
+// GetLogoUploadURL godoc
+// @Summary Get a signed URL to upload a restaurant logo
+// @Description Get a signed URL to upload a restaurant logo to the S3 bucket
+// @Tags restaurants
+// @Produce json
+// @Security jwt
+// @Success 200 {object} models.RestaurantLogoUploadResponse "Presigned URL"
+// @Failure 500 {string} string "Failed to get upload URL"
+// @Router /restaurants/logo/uploadurl [get]
+func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Request) {
+	// Extract the user ID from the request context
+	UID := r.Context().Value("UID").(string)
+
+	if UID == "" {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
+	presignedURL, storedFileURL, err := h.restaurantService.GetLogoUploadURL(UID, h.config.RestaurantLogosBucket)
+	if err != nil {
+		h.logger.WithError(err).Error("failed to get upload URL")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get upload URL")
+		return
+	}
+
+	// Make sure the PresignedURL and StoredFileURL are correctly URL encoded
+	presignedURLResposne := &models.RestaurantLogoUploadResponse{
+		PresignedURL:  presignedURL,
+		StoredFileURL: storedFileURL,
+		Description:   "The stored_file_url is the URL you have to save in the restaurant table in the logo_url column",
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(presignedURLResposne)
 }

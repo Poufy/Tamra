@@ -61,7 +61,7 @@ func main() {
 	orderService := services.NewOrderService(orderRepository)
 
 	userHandler := handlers.NewUserHandler(userService, validator, logger)
-	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger)
+	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger, config)
 	orderHandler := handlers.NewOrderHandler(orderService, validator, logger)
 
 	authMiddleware := middleware.AuthMiddleware(firebaseAuth, logger)

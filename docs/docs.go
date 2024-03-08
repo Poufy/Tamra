@@ -291,6 +291,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/restaurants/logo/uploadurl": {
+            "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get a signed URL to upload a restaurant logo to the S3 bucket",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "restaurants"
+                ],
+                "summary": "Get a signed URL to upload a restaurant logo",
+                "responses": {
+                    "200": {
+                        "description": "Presigned URL",
+                        "schema": {
+                            "$ref": "#/definitions/models.RestaurantLogoUploadResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get upload URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/restaurants/me": {
             "get": {
                 "security": [
@@ -552,17 +583,17 @@ const docTemplate = `{
         "models.CreateRestaurantRequest": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
             "properties": {
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"
@@ -637,8 +668,8 @@ const docTemplate = `{
         "models.Restaurant": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
@@ -649,11 +680,11 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"
@@ -665,6 +696,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RestaurantLogoUploadResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "presigned_url": {
+                    "type": "string"
+                },
+                "stored_file_url": {
                     "type": "string"
                 }
             }
@@ -698,17 +743,17 @@ const docTemplate = `{
         "models.UpdateRestaurantRequest": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
             "properties": {
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"

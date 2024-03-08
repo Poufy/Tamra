@@ -7,17 +7,17 @@ definitions:
     type: object
   models.CreateRestaurantRequest:
     properties:
-      image_url:
-        type: string
       latitude:
         type: number
+      logo_url:
+        type: string
       longitude:
         type: number
       name:
         type: string
     required:
-    - image_url
     - latitude
+    - logo_url
     - longitude
     - name
     type: object
@@ -70,10 +70,10 @@ definitions:
         type: string
       id:
         type: integer
-      image_url:
-        type: string
       latitude:
         type: number
+      logo_url:
+        type: string
       longitude:
         type: number
       name:
@@ -83,10 +83,19 @@ definitions:
       user_id:
         type: string
     required:
-    - image_url
     - latitude
+    - logo_url
     - longitude
     - name
+    type: object
+  models.RestaurantLogoUploadResponse:
+    properties:
+      description:
+        type: string
+      presigned_url:
+        type: string
+      stored_file_url:
+        type: string
     type: object
   models.UpdateOrderRequest:
     properties:
@@ -108,17 +117,17 @@ definitions:
     type: object
   models.UpdateRestaurantRequest:
     properties:
-      image_url:
-        type: string
       latitude:
         type: number
+      logo_url:
+        type: string
       longitude:
         type: number
       name:
         type: string
     required:
-    - image_url
     - latitude
+    - logo_url
     - longitude
     - name
     type: object
@@ -325,6 +334,25 @@ paths:
       security:
       - jwt: []
       summary: Create a new restaurant
+      tags:
+      - restaurants
+  /restaurants/logo/uploadurl:
+    get:
+      description: Get a signed URL to upload a restaurant logo to the S3 bucket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Presigned URL
+          schema:
+            $ref: '#/definitions/models.RestaurantLogoUploadResponse'
+        "500":
+          description: Failed to get upload URL
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Get a signed URL to upload a restaurant logo
       tags:
       - restaurants
   /restaurants/me:

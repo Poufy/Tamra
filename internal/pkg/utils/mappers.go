@@ -56,7 +56,7 @@ func MapCreateRestaurantRequestToRestaurant(req *models.CreateRestaurantRequest)
 	return &models.Restaurant{
 		Longitude: req.Longitude,
 		Latitude:  req.Latitude,
-		ImageURL:  req.ImageURL,
+		LogoURL:   req.LogoURL,
 		Name:      req.Name,
 	}
 }
@@ -67,7 +67,7 @@ func MapRestaurantToRestaurantResponse(restaurant *models.Restaurant) *models.Re
 		ID:        restaurant.ID,
 		Longitude: restaurant.Longitude,
 		Latitude:  restaurant.Latitude,
-		ImageURL:  restaurant.ImageURL,
+		LogoURL:   restaurant.LogoURL,
 		Name:      restaurant.Name,
 		CreatedAt: restaurant.CreatedAt,
 		UpdatedAt: restaurant.UpdatedAt,
@@ -87,7 +87,7 @@ func MapUpdateRestaurantRequestToRestaurant(req *models.UpdateRestaurantRequest)
 	return &models.Restaurant{
 		Longitude: req.Longitude,
 		Latitude:  req.Latitude,
-		ImageURL:  req.ImageURL,
+		LogoURL:   req.LogoURL,
 		Name:      req.Name,
 	}
 }

@@ -289,6 +289,37 @@
                 }
             }
         },
+        "/restaurants/logo/uploadurl": {
+            "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get a signed URL to upload a restaurant logo to the S3 bucket",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "restaurants"
+                ],
+                "summary": "Get a signed URL to upload a restaurant logo",
+                "responses": {
+                    "200": {
+                        "description": "Presigned URL",
+                        "schema": {
+                            "$ref": "#/definitions/models.RestaurantLogoUploadResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get upload URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/restaurants/me": {
             "get": {
                 "security": [
@@ -550,17 +581,17 @@
         "models.CreateRestaurantRequest": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
             "properties": {
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"
@@ -635,8 +666,8 @@
         "models.Restaurant": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
@@ -647,11 +678,11 @@
                 "id": {
                     "type": "integer"
                 },
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"
@@ -663,6 +694,20 @@
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RestaurantLogoUploadResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "presigned_url": {
+                    "type": "string"
+                },
+                "stored_file_url": {
                     "type": "string"
                 }
             }
@@ -696,17 +741,17 @@
         "models.UpdateRestaurantRequest": {
             "type": "object",
             "required": [
-                "image_url",
                 "latitude",
+                "logo_url",
                 "longitude",
                 "name"
             ],
             "properties": {
-                "image_url": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "longitude": {
                     "type": "number"

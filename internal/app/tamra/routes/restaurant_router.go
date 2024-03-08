@@ -26,6 +26,7 @@ func (router *RestaurantRouter) GetRouter() chi.Router {
 	r.Use(router.authMiddlware)
 	r.Post("/", router.restaurantHandler.CreateRestaurant)
 	r.Get("/me", router.restaurantHandler.GetRestaurant)
+	r.Get("/logo/uploadurl", router.restaurantHandler.GetLogoUploadURL)
 	r.Patch("/me", router.restaurantHandler.UpdateRestaurant)
 	return r
 }

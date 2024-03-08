@@ -3,6 +3,7 @@ package services
 import (
 	"Tamra/internal/app/tamra/repositories"
 	"Tamra/internal/pkg/models"
+	"Tamra/internal/pkg/utils"
 	"fmt"
 )
 
@@ -39,4 +40,13 @@ func (s *RestaurantService) UpdateRestaurant(restaurant *models.Restaurant) (*mo
 		return nil, fmt.Errorf("failed to update restaurant: %w", err)
 	}
 	return updatedRestaurant, nil
+}
+
+func (s *RestaurantService) GetLogoUploadURL(UID, uploadBucketName string) (string, string, error) {
+	// UserID is the ID extracted from the JWT token created by firebase, not the user ID from the User table.
+	presignedURL, storedFileURL, err := utils.GetS3PresignedURL(UID, uploadBucketName)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to get presigned URL: %w", err)
+	}
+	return presignedURL, storedFileURL, nil
 }

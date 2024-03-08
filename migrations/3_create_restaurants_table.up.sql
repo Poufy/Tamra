@@ -1,7 +1,7 @@
 CREATE TABLE restaurants (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
-    image_url TEXT,
+    logo_url TEXT,
 	location GEOGRAPHY(Point, 4326) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
