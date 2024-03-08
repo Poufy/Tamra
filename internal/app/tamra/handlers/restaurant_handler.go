@@ -24,17 +24,18 @@ func NewRestaurantHandler(restaurantService *services.RestaurantService, validat
 }
 
 // CreateRestaurant godoc
-// @Summary Create a new restaurant
-// @Description Create a new restaurant with the given request body
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param request body models.CreateRestaurantRequest true "Create Restaurant Request"
-// @Security jwt
-// @Success 201 {object} models.Restaurant "Created Restaurant"
-// @Failure 400 {string} string "Invalid request body"
-// @Failure 500 {string} string "Failed to create restaurant"
-// @Router /restaurants [post]
+//
+//	@Summary		Create a new restaurant
+//	@Description	Create a new restaurant with the given request body
+//	@Tags			restaurants
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	models.CreateRestaurantRequest	true	"Create Restaurant Request"
+//	@Security		jwt
+//	@Success		201	{object}	models.Restaurant	"Created Restaurant"
+//	@Failure		400	{string}	string				"Invalid request body"
+//	@Failure		500	{string}	string				"Failed to create restaurant"
+//	@Router			/restaurants [post]
 func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
 	createRestaurantRequest := &models.CreateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(createRestaurantRequest)
@@ -58,7 +59,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	// It should be loosely coupled and only know about the domain models
 	restaurant := utils.MapCreateRestaurantRequestToRestaurant(createRestaurantRequest)
 	// Extract the user ID from the request context
-	userID, ok := r.Context().Value("UserID").(string)
+	userID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Error("Context", r.Context())
 		h.logger.Error("failed to get user ID from request context")
@@ -82,15 +83,16 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 }
 
 // GetRestaurant godoc
-// @Summary Get a restaurant
-// @Description Get a restaurant by the user ID
-// @Tags restaurants
-// @Produce json
-// @Security jwt
-// @Success 200 {object} models.Restaurant "Restaurant"
-// @Failure 404 {string} string "Restaurant not found"
-// @Failure 500 {string} string "Failed to get restaurant"
-// @Router /restaurants/me [get]
+//
+//	@Summary		Get a restaurant
+//	@Description	Get a restaurant by the user ID
+//	@Tags			restaurants
+//	@Produce		json
+//	@Security		jwt
+//	@Success		200	{object}	models.Restaurant	"Restaurant"
+//	@Failure		404	{string}	string				"Restaurant not found"
+//	@Failure		500	{string}	string				"Failed to get restaurant"
+//	@Router			/restaurants/me [get]
 func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the request context
 	userID := r.Context().Value("UserID").(string)
@@ -121,17 +123,18 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 }
 
 // UpdateRestaurant godoc
-// @Summary Update a restaurant
-// @Description Update a restaurant with the given request body
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param request body models.UpdateRestaurantRequest true "Update Restaurant Request"
-// @Security jwt
-// @Success 200 {object} models.Restaurant "Updated Restaurant"
-// @Failure 400 {string} string "Invalid request body"
-// @Failure 500 {string} string "Failed to update restaurant"
-// @Router /restaurants/me [patch]
+//
+//	@Summary		Update a restaurant
+//	@Description	Update a restaurant with the given request body
+//	@Tags			restaurants
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	models.UpdateRestaurantRequest	true	"Update Restaurant Request"
+//	@Security		jwt
+//	@Success		200	{object}	models.Restaurant	"Updated Restaurant"
+//	@Failure		400	{string}	string				"Invalid request body"
+//	@Failure		500	{string}	string				"Failed to update restaurant"
+//	@Router			/restaurants/me [patch]
 func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the request context
 	h.logger.Infof("Context: %+v", r.Context())
@@ -178,14 +181,15 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 }
 
 // GetLogoUploadURL godoc
-// @Summary Get a signed URL to upload a restaurant logo
-// @Description Get a signed URL to upload a restaurant logo to the S3 bucket
-// @Tags restaurants
-// @Produce json
-// @Security jwt
-// @Success 200 {object} models.RestaurantLogoUploadResponse "Presigned URL"
-// @Failure 500 {string} string "Failed to get upload URL"
-// @Router /restaurants/logo/uploadurl [get]
+//
+//	@Summary		Get a signed URL to upload a restaurant logo
+//	@Description	Get a signed URL to upload a restaurant logo to the S3 bucket
+//	@Tags			restaurants
+//	@Produce		json
+//	@Security		jwt
+//	@Success		200	{object}	models.RestaurantLogoUploadResponse	"Presigned URL"
+//	@Failure		500	{string}	string								"Failed to get upload URL"
+//	@Router			/restaurants/logo/uploadurl [get]
 func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the request context
 	UID := r.Context().Value("UID").(string)

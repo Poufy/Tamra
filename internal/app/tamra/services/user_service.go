@@ -26,22 +26,13 @@ func (s *UserService) CreateUser(user *models.User) (*models.User, error) {
 	return createdUser, nil
 }
 
-func (s *UserService) GetUser(id int) (*models.User, error) {
-	user, err := s.userRepository.GetUser(id)
+func (s *UserService) GetUser(userID string) (*models.User, error) {
+	user, err := s.userRepository.GetUser(userID)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 	return user, nil
-}
-
-func (s *UserService) GetUsers() ([]*models.User, error) {
-	users, err := s.userRepository.GetUsers()
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return nil, fmt.Errorf("failed to get users: %w", err)
-	}
-	return users, nil
 }
 
 func (s *UserService) UpdateUser(user *models.User) (*models.User, error) {
@@ -53,11 +44,20 @@ func (s *UserService) UpdateUser(user *models.User) (*models.User, error) {
 	return updatedUser, nil
 }
 
-func (s *UserService) DeleteUser(id int) error {
-	err := s.userRepository.DeleteUser(id)
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to delete user: %w", err)
-	}
-	return nil
-}
+// func (s *UserService) GetUsers() ([]*models.User, error) {
+// 	users, err := s.userRepository.GetUsers()
+// 	if err != nil {
+// 		// Wrap the error returned by the repository and add some context
+// 		return nil, fmt.Errorf("failed to get users: %w", err)
+// 	}
+// 	return users, nil
+// }
+
+// func (s *UserService) DeleteUser(id int) error {
+// 	err := s.userRepository.DeleteUser(id)
+// 	if err != nil {
+// 		// Wrap the error returned by the repository and add some context
+// 		return fmt.Errorf("failed to delete user: %w", err)
+// 	}
+// 	return nil
+// }

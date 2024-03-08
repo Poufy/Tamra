@@ -30,23 +30,3 @@ func (router *RestaurantRouter) GetRouter() chi.Router {
 	r.Patch("/me", router.restaurantHandler.UpdateRestaurant)
 	return r
 }
-
-func userRoutes(userHandler *handlers.UserHandler) chi.Router {
-	r := chi.NewRouter()
-	r.Post("/", userHandler.CreateUser)
-	r.Get("/", userHandler.GetUsers)
-	r.Get("/{id}", userHandler.GetUser)
-	r.Patch("/{id}", userHandler.UpdateUser)
-
-	return r
-}
-
-func orderRoutes(orderHandler *handlers.OrderHandler) chi.Router {
-	r := chi.NewRouter()
-	r.Post("/", orderHandler.CreateOrder)
-	r.Get("/", orderHandler.GetOrders)
-	r.Get("/{id}", orderHandler.GetOrder)
-	r.Patch("/{id}", orderHandler.UpdateOrder)
-	r.Post("/{id}/reassign", orderHandler.ReassignOrder)
-	return r
-}

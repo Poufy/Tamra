@@ -131,6 +131,27 @@ definitions:
     - longitude
     - name
     type: object
+  models.UpdateUserRequest:
+    properties:
+      fcm_token:
+        type: string
+      is_active:
+        type: boolean
+      latitude:
+        type: number
+      longitude:
+        type: number
+      phone:
+        type: string
+      radius:
+        type: integer
+    required:
+    - fcm_token
+    - latitude
+    - longitude
+    - phone
+    - radius
+    type: object
   models.UserResponse:
     properties:
       id:
@@ -147,6 +168,8 @@ definitions:
         type: string
       radius:
         type: integer
+      user_id:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -410,36 +433,14 @@ paths:
       tags:
       - restaurants
   /users:
-    get:
-      description: Get all users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.UserResponse'
-            type: array
-        "404":
-          description: users not found
-          schema:
-            type: string
-        "500":
-          description: failed to get users
-          schema:
-            type: string
-      summary: Get all users
-      tags:
-      - users
     post:
       consumes:
       - application/json
       description: Create a user
       parameters:
-      - description: User to be created
+      - description: Create User Request
         in: body
-        name: user
+        name: request
         required: true
         schema:
           $ref: '#/definitions/models.CreateUserRequest'
@@ -447,53 +448,25 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Created User
           schema:
             $ref: '#/definitions/models.UserResponse'
         "400":
-          description: invalid request body
+          description: Invalid request body
           schema:
             type: string
         "500":
-          description: failed to create user
+          description: Failed to create user
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Create a user
       tags:
       - users
-  /users/{id}:
-    delete:
-      description: Delete a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: user deleted
-          schema:
-            type: string
-        "400":
-          description: invalid user ID
-          schema:
-            type: string
-        "500":
-          description: failed to delete user
-          schema:
-            type: string
-      summary: Delete a user
-      tags:
-      - users
+  /users/me:
     get:
-      description: Get a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: Get a user by the user ID
       produces:
       - application/json
       responses:
@@ -501,10 +474,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.UserResponse'
-        "400":
-          description: invalid user ID
-          schema:
-            type: string
         "404":
           description: user not found
           schema:
@@ -513,7 +482,40 @@ paths:
           description: failed to get user
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Get a user
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Update a user
+      parameters:
+      - description: Update User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated User
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update user
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Update a user
       tags:
       - users
 schemes:

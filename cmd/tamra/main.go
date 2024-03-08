@@ -17,20 +17,22 @@ import (
 	// "github.com/go-chi/chi/v5/middleware"
 )
 
-// @title Tamra API
-// @version 1
-// @description This is the API for the Tamra application
-// @host localhost:8080
-// @BasePath /api/v1
-// @schemes http https
+//	@title						Tamra API
+//	@version					1
+//	@description				This is the API for the Tamra application
+//	@host						localhost:8080
+//	@BasePath					/api/v1
+//	@schemes					http https
+//
 // this is openapi2.0 so bearer token is not supported. so we use apikey and name it jwt
-// @securityDefinitions.apiKey jwt
-// @in header
-// @name Authorization
-// @description Bearer token
-// @tokenUrl http://localhost:8080/api/v1/users/login
-// @produce json
-// @consumes json
+//
+//	@securityDefinitions.apiKey	jwt
+//	@in							header
+//	@name						Authorization
+//	@description				Bearer token
+//	@tokenUrl					http://localhost:8080/api/v1/users/login
+//	@produce					json
+//	@consumes					json
 func main() {
 	// Read the configuration
 	config := utils.GetConfig()

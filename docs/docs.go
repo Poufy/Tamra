@@ -409,40 +409,12 @@ const docTemplate = `{
             }
         },
         "/users": {
-            "get": {
-                "description": "Get all users",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.UserResponse"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "users not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "failed to get users",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Create a user",
                 "consumes": [
                     "application/json"
@@ -456,8 +428,8 @@ const docTemplate = `{
                 "summary": "Create a user",
                 "parameters": [
                     {
-                        "description": "User to be created",
-                        "name": "user",
+                        "description": "Create User Request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -467,19 +439,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Created User",
                         "schema": {
                             "$ref": "#/definitions/models.UserResponse"
                         }
                     },
                     "400": {
-                        "description": "invalid request body",
+                        "description": "Invalid request body",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to create user",
+                        "description": "Failed to create user",
                         "schema": {
                             "type": "string"
                         }
@@ -487,9 +459,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/users/me": {
             "get": {
-                "description": "Get a user",
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get a user by the user ID",
                 "produces": [
                     "application/json"
                 ],
@@ -497,26 +474,11 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get a user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "invalid user ID",
-                        "schema": {
-                            "type": "string"
                         }
                     },
                     "404": {
@@ -533,36 +495,49 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
-                "description": "Delete a user",
+            "patch": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Update a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete a user",
+                "summary": "Update a user",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Update User Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "user deleted",
+                        "description": "Updated User",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserResponse"
                         }
                     },
                     "400": {
-                        "description": "invalid user ID",
+                        "description": "Invalid request body",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to delete user",
+                        "description": "Failed to update user",
                         "schema": {
                             "type": "string"
                         }
@@ -763,6 +738,36 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "fcm_token",
+                "latitude",
+                "longitude",
+                "phone",
+                "radius"
+            ],
+            "properties": {
+                "fcm_token": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "radius": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.UserResponse": {
             "type": "object",
             "properties": {
@@ -786,6 +791,9 @@ const docTemplate = `{
                 },
                 "radius": {
                     "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         }

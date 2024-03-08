@@ -27,6 +27,7 @@ func MapUserToUserResponse(user *models.User) *models.UserResponse {
 		IsActive:          user.IsActive,
 		Phone:             user.Phone,
 		Radius:            user.Radius,
+		UserID:            user.UserID,
 		LastOrderReceived: user.LastOrderReceived,
 	}
 }
@@ -69,6 +70,7 @@ func MapRestaurantToRestaurantResponse(restaurant *models.Restaurant) *models.Re
 		Latitude:  restaurant.Latitude,
 		LogoURL:   restaurant.LogoURL,
 		Name:      restaurant.Name,
+		UserID:    restaurant.UserID,
 		CreatedAt: restaurant.CreatedAt,
 		UpdatedAt: restaurant.UpdatedAt,
 	}

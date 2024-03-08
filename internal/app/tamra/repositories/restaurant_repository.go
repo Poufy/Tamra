@@ -46,3 +46,32 @@ func (r *RestaurantRepositoryImpl) UpdateRestaurant(restaurant *models.Restauran
 	err := r.db.QueryRow(query, restaurant.Name, restaurant.Longitude, restaurant.Latitude, restaurant.LogoURL, restaurant.UserID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.UserID, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 	return restaurant, err
 }
+
+func (r *RestaurantRepositoryImpl) GetRestaurants() ([]*models.Restaurant, error) {
+	rows, err := r.db.Query("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, logo_url, user_id, created_at, updated_at FROM restaurants")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	restaurants := []*models.Restaurant{}
+	for rows.Next() {
+		restaurant := &models.Restaurant{}
+		err := rows.Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		restaurants = append(restaurants, restaurant)
+	}
+
+	if len(restaurants) == 0 {
+		return nil, utils.ErrNotFound
+	}
+
+	return restaurants, nil
+}
+
+func (r *RestaurantRepositoryImpl) DeleteRestaurant(id int) error {
+	_, err := r.db.Exec("DELETE FROM restaurants WHERE id = $1", id)
+	return err
+}

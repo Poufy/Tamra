@@ -8,14 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
 
-//? Is this okay? Define an interface for the validator so we can pass the validator as a parameter
-//? to the handler without having to import the validator package.
+// ? Is this okay? Define an interface for the validator so we can pass the validator as a parameter
+// ? to the handler without having to import the validator package.
 type Validator interface {
 	Struct(s interface{}) error
 }
@@ -31,15 +29,17 @@ func NewUserHandler(userService *services.UserService, validator Validator, logg
 }
 
 // CreateUser godoc
+//
 //	@Summary		Create a user
 //	@Description	Create a user
 //	@Tags			users
-//	@Accept		json
+//	@Accept			json
 //	@Produce		json
-//	@Param			user	body	models.CreateUserRequest	true	"User to be created"
-//	@Success		201	{object}	models.UserResponse
-//	@Failure		400	{string}	string	"invalid request body"
-//	@Failure		500	{string}	string	"failed to create user"
+//	@Param			request	body	models.CreateUserRequest	true	"Create User Request"
+//	@Security		jwt
+//	@Success		201	{object}	models.UserResponse	"Created User"
+//	@Failure		400	{string}	string				"Invalid request body"
+//	@Failure		500	{string}	string				"Failed to create user"
 //	@Router			/users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	createUserRequest := &models.CreateUserRequest{}
@@ -64,7 +64,15 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	user := utils.MapCreateUserRequestToUser(createUserRequest)
 
-	h.logger.Infof("user to be created: %+v. Token: %s", user, user.FCMToken)
+	userID, ok := r.Context().Value("UID").(string)
+	if !ok {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
+	user.UserID = userID
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to create user")
@@ -82,28 +90,26 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUser godoc
+//
 //	@Summary		Get a user
-//	@Description	Get a user
+//	@Description	Get a user by the user ID
 //	@Tags			users
 //	@Produce		json
-//	@Param			id	path	int	true	"User ID"
+//	@Security		jwt
 //	@Success		200	{object}	models.UserResponse
-//	@Failure		400	{string}	string	"invalid user ID"
 //	@Failure		404	{string}	string	"user not found"
 //	@Failure		500	{string}	string	"failed to get user"
-//	@Router			/users/{id} [get]
+//	@Router			/users/me [get]
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-
-	if err != nil {
-		h.logger.WithError(err).Error("invalid user ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid user ID")
+	userID, ok := r.Context().Value("UID").(string)
+	if !ok {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
 		return
 	}
 
-	user, err := h.userService.GetUser(id)
+	user, err := h.userService.GetUser(userID)
 	if err != nil {
 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
 		if errors.Is(err, utils.ErrNotFound) {
@@ -119,73 +125,37 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Infof("user retrieved: %v", user)
-
 	// Map the user to a UserResponse
 	userResponse := utils.MapUserToUserResponse(user)
 
 	json.NewEncoder(w).Encode(userResponse)
 }
 
-// GetUsers godoc
-//	@Summary		Get all users
-//	@Description	Get all users
-//	@Tags			users
-//	@Produce		json
-//	@Success		200	{array}		models.UserResponse
-//	@Failure		404	{string}	string	"users not found"
-//	@Failure		500	{string}	string	"failed to get users"
-//	@Router			/users [get]
-func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.userService.GetUsers()
-	if err != nil {
-		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
-		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("users not found")
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "users not found")
-			return
-		}
-
-		h.logger.WithError(err).Error("failed to get users")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to get users")
-	}
-
-	h.logger.Info("users retrieved.")
-
-	userResponses := utils.MapUsersToUserResponses(users)
-
-	json.NewEncoder(w).Encode(userResponses)
-}
-
 // UpdateUser godoc
-// @Summary     Update a user
-// @Description Update a user
-// @Tags        users
-// @Accept      json
-// @Produce     json
-// @Param       id      path    int     true        "User ID"
-// @Param       user    body    models.UpdateUserRequest   true        "User data to be updated"
-// @Success     200     {object}    models.UserResponse
-// @Failure     400     {string}    string  "invalid user ID"
-// @Failure     400     {string}    string  "invalid request body"
-// @Failure     500     {string}    string  "failed to decode request body"
-// @Failure     500     {string}    string  "failed to update user"
-// @Router      /users/{id} [put]
-
+//
+//	@Summary		Update a user
+//	@Description	Update a user
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	models.UpdateUserRequest	true	"Update User Request"
+//	@Security		jwt
+//	@Success		200	{object}	models.UserResponse	"Updated User"
+//	@Failure		400	{string}	string				"Invalid request body"
+//	@Failure		500	{string}	string				"Failed to update user"
+//	@Router			/users/me [patch]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		h.logger.WithError(err).Error("invalid user ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid user ID")
+	userId, ok := r.Context().Value("UID").(string)
+
+	if !ok {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
 		return
 	}
 
 	updateUserRequest := &models.UpdateUserRequest{}
-	err = json.NewDecoder(r.Body).Decode(updateUserRequest)
+	err := json.NewDecoder(r.Body).Decode(updateUserRequest)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to decode request body")
 		w.WriteHeader(http.StatusBadRequest)
@@ -204,7 +174,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user := utils.MapUpdateUserRequestToUser(updateUserRequest)
 
 	// Set the ID of the user to the ID from the URL
-	user.ID = id
+	user.UserID = userId
 
 	updatedUser, err := h.userService.UpdateUser(user)
 	if err != nil {
@@ -221,33 +191,47 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userResponse)
 }
 
-// DeleteUser godoc
-// @Summary     Delete a user
-// @Description Delete a user
-// @Tags        users
-// @Param       id      path    int     true        "User ID"
-// @Success     200     {string}    string  "user deleted"
-// @Failure     400     {string}    string  "invalid user ID"
-// @Failure     500     {string}    string  "failed to delete user"
-// @Router      /users/{id} [delete]
-func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		h.logger.WithError(err).Error("invalid user ID")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid user ID")
-		return
-	}
+// func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
+// 	users, err := h.userService.GetUsers()
+// 	if err != nil {
+// 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
+// 		if errors.Is(err, utils.ErrNotFound) {
+// 			h.logger.WithError(err).Error("users not found")
+// 			w.WriteHeader(http.StatusNotFound)
+// 			fmt.Fprint(w, "users not found")
+// 			return
+// 		}
 
-	err = h.userService.DeleteUser(id)
-	if err != nil {
-		h.logger.WithError(err).Error("failed to delete user")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to delete user")
-		return
-	}
+// 		h.logger.WithError(err).Error("failed to get users")
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		fmt.Fprint(w, "failed to get users")
+// 	}
 
-	h.logger.Infof("user deleted: %v", id)
-	w.WriteHeader(http.StatusOK)
-}
+// 	h.logger.Info("users retrieved.")
+
+// 	userResponses := utils.MapUsersToUserResponses(users)
+
+// 	json.NewEncoder(w).Encode(userResponses)
+// }
+
+// func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+// 	idStr := chi.URLParam(r, "id")
+// 	id, err := strconv.Atoi(idStr)
+// 	if err != nil {
+// 		h.logger.WithError(err).Error("invalid user ID")
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		fmt.Fprint(w, "invalid user ID")
+// 		return
+// 	}
+
+// 	err = h.userService.DeleteUser(id)
+// 	if err != nil {
+// 		h.logger.WithError(err).Error("failed to delete user")
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		fmt.Fprint(w, "failed to delete user")
+// 		return
+// 	}
+
+// 	h.logger.Infof("user deleted: %v", id)
+// 	w.WriteHeader(http.StatusOK)
+// }

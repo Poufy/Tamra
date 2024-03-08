@@ -13,6 +13,7 @@ type User struct {
 	Radius            int       `json:"radius" validate:"required"`
 	FCMToken          string    `json:"fcm_token" validate:"required"`
 	LastOrderReceived time.Time `json:"last_order_received"`
+	UserID            string    `json:"user_id"` // This is the value of the UID field in the Firebase token
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
@@ -42,4 +43,5 @@ type UserResponse struct {
 	Phone             string    `json:"phone"`
 	Radius            int       `json:"radius"`
 	LastOrderReceived time.Time `json:"last_order_received"`
+	UserID            string    `json:"user_id"`
 }
