@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     location GEOGRAPHY(Point, 4326) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     fcm_token TEXT UNIQUE NOT NULL,
     phone VARCHAR(255) UNIQUE,
     radius INT NOT NULL,
@@ -10,3 +10,5 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX users_last_order_received_index ON users (last_order_received);

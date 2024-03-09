@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/orders": {
             "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Get a list of all orders",
                 "consumes": [
                     "application/json"
@@ -53,6 +58,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Create a new order with the given request body",
                 "consumes": [
                     "application/json"
@@ -99,6 +109,11 @@ const docTemplate = `{
         },
         "/orders/{id}": {
             "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Get a order",
                 "consumes": [
                     "application/json"
@@ -147,6 +162,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Update a order",
                 "consumes": [
                     "application/json"
@@ -198,6 +218,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
                 "description": "Delete a order",
                 "consumes": [
                     "application/json"
@@ -409,6 +434,44 @@ const docTemplate = `{
             }
         },
         "/users": {
+            "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get all users",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.UserResponse"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "users not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to get users",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -549,9 +612,15 @@ const docTemplate = `{
     "definitions": {
         "models.CreateOrderRequest": {
             "type": "object",
+            "required": [
+                "restaurant_id"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
+                },
+                "restaurant_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -793,7 +862,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         }

@@ -13,13 +13,13 @@ import (
 )
 
 type RestaurantHandler struct {
-	restaurantService *services.RestaurantService
+	restaurantService services.RestaurantService
 	validator         Validator
 	logger            logrus.FieldLogger
 	config            utils.Config
 }
 
-func NewRestaurantHandler(restaurantService *services.RestaurantService, validator Validator, logger logrus.FieldLogger, config utils.Config) *RestaurantHandler {
+func NewRestaurantHandler(restaurantService services.RestaurantService, validator Validator, logger logrus.FieldLogger, config utils.Config) *RestaurantHandler {
 	return &RestaurantHandler{restaurantService: restaurantService, validator: validator, logger: logger, config: config}
 }
 

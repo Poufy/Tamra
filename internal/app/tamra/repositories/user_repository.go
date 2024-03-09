@@ -24,6 +24,10 @@ type UserRepository interface {
 	GetUser(userId string) (*models.User, error)
 	// UpdateUser updates a user
 	UpdateUser(user *models.User) (*models.User, error)
+	// Retrieve the user that last received an order
+	GetUserToReceiveOrder() (*models.User, error)
+	// GetUsers returns a list of users
+	GetUsers() ([]*models.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -35,6 +39,9 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *UserRepositoryImpl) CreateUser(user *models.User) (*models.User, error) {
+	logrus.Info("User: ", user)
+	//! Delete this line
+	user.IsActive = true
 	const query = "INSERT INTO users (location, is_active, phone, radius, fcm_token, user_id ,last_order_received, created_at, updated_at) VALUES (ST_SetSRID(ST_MakePoint($1, $2), 4326), $3, $4, $5, $6, $7, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, user_id, last_order_received, created_at, updated_at"
 	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken, user.UserID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.UserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
@@ -82,6 +89,22 @@ func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
 func (r *UserRepositoryImpl) UpdateUser(user *models.User) (*models.User, error) {
 	const query = "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326), is_active = $3, phone = $4, radius = $5, fcm_token = $6, last_order_received = $7, updated_at = CLOCK_TIMESTAMP() WHERE user_id = $8 RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, user_id, last_order_received, created_at, updated_at"
 	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken, user.LastOrderReceived, user.UserID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.UserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	return user, err
+}
+
+// GetUserToReceiveOrder retrieves the user that last received an order.
+// Newly created users will be last in line to receive an order as
+// last_order_recieved is set to the current time when the user is created
+func (r *UserRepositoryImpl) GetUserToReceiveOrder() (*models.User, error) {
+	const query = `
+	SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, user_id, last_order_received, created_at, updated_at 
+	FROM users 
+	WHERE is_active = true 
+	ORDER BY last_order_received 
+	ASC LIMIT 1
+	`
+	user := &models.User{}
+	err := r.db.QueryRow(query).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.UserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 

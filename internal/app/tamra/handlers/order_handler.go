@@ -15,12 +15,12 @@ import (
 )
 
 type OrderHandler struct {
-	orderService *services.OrderService
+	orderService services.OrderService
 	validator    Validator
 	logger       logrus.FieldLogger
 }
 
-func NewOrderHandler(orderService *services.OrderService, validator Validator, logger logrus.FieldLogger) *OrderHandler {
+func NewOrderHandler(orderService services.OrderService, validator Validator, logger logrus.FieldLogger) *OrderHandler {
 	return &OrderHandler{orderService: orderService, validator: validator, logger: logger}
 }
 
@@ -31,10 +31,11 @@ func NewOrderHandler(orderService *services.OrderService, validator Validator, l
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		models.CreateOrderRequest	true	"Create Order Request"
-//	@Success		201		{object}	models.Order				"Created Order"
-//	@Failure		400		{string}	string						"Invalid request body"
-//	@Failure		500		{string}	string						"Failed to create order"
+//	@Param			request	body	models.CreateOrderRequest	true	"Create Order Request"
+//	@Security		jwt
+//	@Success		201	{object}	models.Order	"Created Order"
+//	@Failure		400	{string}	string			"Invalid request body"
+//	@Failure		500	{string}	string			"Failed to create order"
 //	@Router			/orders [post]
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	createOrderRequest := &models.CreateOrderRequest{}
@@ -78,6 +79,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
+//	@Security		jwt
 //	@Success		200	{array}		models.Order	"List of Orders"
 //	@Failure		404	{string}	string			"order not found"
 //	@Failure		500	{string}	string			"failed to get orders"
@@ -108,7 +110,8 @@ func (h *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int				true	"Order ID"
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
 //	@Success		200	{object}	models.Order	"Order"
 //	@Failure		400	{string}	string			"invalid order ID"
 //	@Failure		404	{string}	string			"order not found"
@@ -148,13 +151,14 @@ func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int							true	"Order ID"
-//	@Param			order	body		models.UpdateOrderRequest	true	"Order data to be updated"
-//	@Success		200		{object}	models.Order				"Updated Order"
-//	@Failure		400		{string}	string						"invalid order ID"
-//	@Failure		400		{string}	string						"invalid request body"
-//	@Failure		500		{string}	string						"failed to decode request body"
-//	@Failure		500		{string}	string						"failed to update order"
+//	@Param			id		path	int							true	"Order ID"
+//	@Param			order	body	models.UpdateOrderRequest	true	"Order data to be updated"
+//	@Security		jwt
+//	@Success		200	{object}	models.Order	"Updated Order"
+//	@Failure		400	{string}	string			"invalid order ID"
+//	@Failure		400	{string}	string			"invalid request body"
+//	@Failure		500	{string}	string			"failed to decode request body"
+//	@Failure		500	{string}	string			"failed to update order"
 //	@Router			/orders/{id} [put]
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -207,7 +211,8 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int		true	"Order ID"
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
 //	@Success		204	{string}	string	"No Content"
 //	@Failure		400	{string}	string	"invalid order ID"
 //	@Failure		500	{string}	string	"failed to delete order"

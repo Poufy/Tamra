@@ -19,12 +19,12 @@ type Validator interface {
 }
 
 type UserHandler struct {
-	userService *services.UserService
+	userService services.UserService
 	validator   Validator
 	logger      logrus.FieldLogger
 }
 
-func NewUserHandler(userService *services.UserService, validator Validator, logger logrus.FieldLogger) *UserHandler {
+func NewUserHandler(userService services.UserService, validator Validator, logger logrus.FieldLogger) *UserHandler {
 	return &UserHandler{userService: userService, validator: validator, logger: logger}
 }
 
@@ -64,7 +64,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	user := utils.MapCreateUserRequestToUser(createUserRequest)
 
-	userID, ok := r.Context().Value("UID").(string)
+	userID, ok := r.Context().Value("UID").(int)
 	if !ok {
 		h.logger.Error("failed to get user ID from request context")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -145,7 +145,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string				"Failed to update user"
 //	@Router			/users/me [patch]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	userId, ok := r.Context().Value("UID").(string)
+	userId, ok := r.Context().Value("UID").(int)
 
 	if !ok {
 		h.logger.Error("failed to get user ID from request context")
@@ -191,28 +191,39 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userResponse)
 }
 
-// func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
-// 	users, err := h.userService.GetUsers()
-// 	if err != nil {
-// 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
-// 		if errors.Is(err, utils.ErrNotFound) {
-// 			h.logger.WithError(err).Error("users not found")
-// 			w.WriteHeader(http.StatusNotFound)
-// 			fmt.Fprint(w, "users not found")
-// 			return
-// 		}
+// GetUsers godoc
+//
+//	@Summary		Get all users
+//	@Description	Get all users
+//	@Tags			users
+//	@Produce		json
+//	@Security		jwt
+//	@Success		200	{array}		models.UserResponse
+//	@Failure		404	{string}	string	"users not found"
+//	@Failure		500	{string}	string	"failed to get users"
+//	@Router			/users [get]
+func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.userService.GetUsers()
+	if err != nil {
+		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
+		if errors.Is(err, utils.ErrNotFound) {
+			h.logger.WithError(err).Error("users not found")
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "users not found")
+			return
+		}
 
-// 		h.logger.WithError(err).Error("failed to get users")
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		fmt.Fprint(w, "failed to get users")
-// 	}
+		h.logger.WithError(err).Error("failed to get users")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get users")
+	}
 
-// 	h.logger.Info("users retrieved.")
+	h.logger.Info("users retrieved.")
 
-// 	userResponses := utils.MapUsersToUserResponses(users)
+	userResponses := utils.MapUsersToUserResponses(users)
 
-// 	json.NewEncoder(w).Encode(userResponses)
-// }
+	json.NewEncoder(w).Encode(userResponses)
+}
 
 // func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 // 	idStr := chi.URLParam(r, "id")

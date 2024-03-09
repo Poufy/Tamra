@@ -27,7 +27,7 @@ func (router *UserRouter) GetRouter() chi.Router {
 	// It will also append the UUID of the user to the request context so we can use it in the handler
 	r.Use(router.authMiddlware)
 	r.Post("/", router.userHandler.CreateUser)
-	// r.Get("/", router.userHandler.GetUsers)
+	r.Get("/", router.userHandler.GetUsers)
 	r.Get("/me", router.userHandler.GetUser)
 	r.Patch("/me", router.userHandler.UpdateUser)
 	return r

@@ -97,7 +97,8 @@ func MapUpdateRestaurantRequestToRestaurant(req *models.UpdateRestaurantRequest)
 // MapCreateOrderRequestToOrder maps a CreateOrderRequest to a Order.
 func MapCreateOrderRequestToOrder(req *models.CreateOrderRequest) *models.Order {
 	return &models.Order{
-		Description: req.Description,
+		Description:  req.Description,
+		RestaurantID: req.RestaurantID,
 	}
 }
 

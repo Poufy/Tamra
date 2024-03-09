@@ -5,17 +5,27 @@ import (
 	"Tamra/internal/pkg/models"
 	"Tamra/internal/pkg/utils"
 	"fmt"
+
+	"github.com/sirupsen/logrus"
 )
 
-type RestaurantService struct {
+type RestaurantService interface {
+	CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
+	GetRestaurant(userId string) (*models.Restaurant, error)
+	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
+	GetLogoUploadURL(UID, uploadBucketName string) (string, string, error)
+}
+
+type RestaurantServiceImpl struct {
 	restaurantRepository repositories.RestaurantRepository
+	logger               logrus.FieldLogger
 }
 
-func NewRestaurantService(restaurantRepository repositories.RestaurantRepository) *RestaurantService {
-	return &RestaurantService{restaurantRepository: restaurantRepository}
+func NewRestaurantService(restaurantRepository repositories.RestaurantRepository, logger logrus.FieldLogger) RestaurantService {
+	return &RestaurantServiceImpl{restaurantRepository: restaurantRepository, logger: logger}
 }
 
-func (s *RestaurantService) CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
+func (s *RestaurantServiceImpl) CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
 	createdRestaurant, err := s.restaurantRepository.CreateRestaurant(restaurant)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
@@ -24,7 +34,7 @@ func (s *RestaurantService) CreateRestaurant(restaurant *models.Restaurant) (*mo
 	return createdRestaurant, nil
 }
 
-func (s *RestaurantService) GetRestaurant(userId string) (*models.Restaurant, error) {
+func (s *RestaurantServiceImpl) GetRestaurant(userId string) (*models.Restaurant, error) {
 	restaurant, err := s.restaurantRepository.GetRestaurant(userId)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
@@ -33,7 +43,7 @@ func (s *RestaurantService) GetRestaurant(userId string) (*models.Restaurant, er
 	return restaurant, nil
 }
 
-func (s *RestaurantService) UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
+func (s *RestaurantServiceImpl) UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
 	updatedRestaurant, err := s.restaurantRepository.UpdateRestaurant(restaurant)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
@@ -42,7 +52,7 @@ func (s *RestaurantService) UpdateRestaurant(restaurant *models.Restaurant) (*mo
 	return updatedRestaurant, nil
 }
 
-func (s *RestaurantService) GetLogoUploadURL(UID, uploadBucketName string) (string, string, error) {
+func (s *RestaurantServiceImpl) GetLogoUploadURL(UID, uploadBucketName string) (string, string, error) {
 	// UserID is the ID extracted from the JWT token created by firebase, not the user ID from the User table.
 	presignedURL, storedFileURL, err := utils.GetS3PresignedURL(UID, uploadBucketName)
 	if err != nil {

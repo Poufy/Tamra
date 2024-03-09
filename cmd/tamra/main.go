@@ -58,19 +58,20 @@ func main() {
 	restaurantRepository := repositories.NewRestaurantRepository(db)
 	orderRepository := repositories.NewOrderRepository(db)
 
-	userService := services.NewUserService(userRepository)
-	restaurantService := services.NewRestaurantService(restaurantRepository)
-	orderService := services.NewOrderService(orderRepository)
+	userService := services.NewUserService(userRepository, logger)
+	restaurantService := services.NewRestaurantService(restaurantRepository, logger)
+	orderService := services.NewOrderService(orderRepository, userRepository, logger)
 
 	userHandler := handlers.NewUserHandler(userService, validator, logger)
 	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger, config)
 	orderHandler := handlers.NewOrderHandler(orderService, validator, logger)
 
-	authMiddleware := middleware.AuthMiddleware(firebaseAuth, logger)
+	userAuthMiddleware := middleware.UserAuthMiddleware(firebaseAuth, logger)
+	restaurantAuthMiddleware := middleware.RestaurantAuthMiddleware(firebaseAuth, logger)
 
-	userRouter := routes.NewUserRouter(userHandler, authMiddleware, logger)
-	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, authMiddleware, logger)
-	orderRouter := routes.NewOrderRouter(orderHandler, authMiddleware, logger)
+	userRouter := routes.NewUserRouter(userHandler, userAuthMiddleware, logger)
+	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, restaurantAuthMiddleware, logger)
+	orderRouter := routes.NewOrderRouter(orderHandler, restaurantAuthMiddleware, logger)
 	docsRouter := routes.NewDocsRouter(logger)
 
 	// Create a new chi router

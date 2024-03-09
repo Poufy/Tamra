@@ -4,6 +4,10 @@ definitions:
     properties:
       description:
         type: string
+      restaurant_id:
+        type: integer
+    required:
+    - restaurant_id
     type: object
   models.CreateRestaurantRequest:
     properties:
@@ -169,7 +173,7 @@ definitions:
       radius:
         type: integer
       user_id:
-        type: string
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -200,6 +204,8 @@ paths:
           description: failed to get orders
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Get all orders
       tags:
       - orders
@@ -229,6 +235,8 @@ paths:
           description: Failed to create order
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Create a new order
       tags:
       - orders
@@ -258,6 +266,8 @@ paths:
           description: failed to delete order
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Delete a order
       tags:
       - orders
@@ -290,6 +300,8 @@ paths:
           description: failed to get order
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Get a order
       tags:
       - orders
@@ -324,6 +336,8 @@ paths:
           description: failed to update order
           schema:
             type: string
+      security:
+      - jwt: []
       summary: Update a order
       tags:
       - orders
@@ -433,6 +447,30 @@ paths:
       tags:
       - restaurants
   /users:
+    get:
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "404":
+          description: users not found
+          schema:
+            type: string
+        "500":
+          description: failed to get users
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Get all users
+      tags:
+      - users
     post:
       consumes:
       - application/json

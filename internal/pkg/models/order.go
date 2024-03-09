@@ -16,7 +16,8 @@ type Order struct {
 }
 
 type CreateOrderRequest struct {
-	Description string `json:"description"`
+	Description  string `json:"description"`
+	RestaurantID int    `json:"restaurant_id" validate:"required"`
 }
 
 type UpdateOrderRequest struct {
