@@ -719,6 +719,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "fb_user_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -735,9 +738,6 @@
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -838,6 +838,9 @@
         "models.UserResponse": {
             "type": "object",
             "properties": {
+                "fb_user_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -857,9 +860,6 @@
                     "type": "string"
                 },
                 "radius": {
-                    "type": "integer"
-                },
-                "user_id": {
                     "type": "integer"
                 }
             }

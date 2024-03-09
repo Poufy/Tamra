@@ -12,7 +12,7 @@ type Restaurant struct {
 	Name      string    `json:"name" validate:"required"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	UserID    string    `json:"user_id"`
+	FBUserID  string    `json:"fb_user_id"`
 }
 
 type CreateRestaurantRequest struct {
@@ -35,7 +35,7 @@ type RestaurantResponse struct {
 	Latitude  float64   `json:"latitude"`
 	LogoURL   string    `json:"logo_url"`
 	Name      string    `json:"name"`
-	UserID    string    `json:"user_id"`
+	FBUserID  string    `json:"fb_user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -64,7 +64,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	user := utils.MapCreateUserRequestToUser(createUserRequest)
 
-	userID, ok := r.Context().Value("UID").(int)
+	firebaseUserID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Error("failed to get user ID from request context")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -72,7 +72,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.UserID = userID
+	user.FBUserID = firebaseUserID
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to create user")
@@ -145,15 +145,6 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string				"Failed to update user"
 //	@Router			/users/me [patch]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	userId, ok := r.Context().Value("UID").(int)
-
-	if !ok {
-		h.logger.Error("failed to get user ID from request context")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to get user ID from request context")
-		return
-	}
-
 	updateUserRequest := &models.UpdateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateUserRequest)
 	if err != nil {
@@ -173,8 +164,17 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	user := utils.MapUpdateUserRequestToUser(updateUserRequest)
 
+	firebaseUserID, ok := r.Context().Value("UID").(string)
+
+	if !ok {
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
 	// Set the ID of the user to the ID from the URL
-	user.UserID = userId
+	user.FBUserID = firebaseUserID
 
 	updatedUser, err := h.userService.UpdateUser(user)
 	if err != nil {

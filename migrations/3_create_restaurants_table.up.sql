@@ -5,7 +5,7 @@ CREATE TABLE restaurants (
 	location GEOGRAPHY(Point, 4326) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_id VARCHAR(255) NOT NULL UNIQUE
+    fb_user_id VARCHAR(255) NOT NULL UNIQUE
 );
 
-CREATE INDEX restaurants_uid_index ON restaurants (user_id);
+CREATE INDEX restaurants_uid_index ON restaurants (fb_user_id);

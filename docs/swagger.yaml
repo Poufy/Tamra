@@ -72,6 +72,8 @@ definitions:
     properties:
       created_at:
         type: string
+      fb_user_id:
+        type: string
       id:
         type: integer
       latitude:
@@ -83,8 +85,6 @@ definitions:
       name:
         type: string
       updated_at:
-        type: string
-      user_id:
         type: string
     required:
     - latitude
@@ -158,6 +158,8 @@ definitions:
     type: object
   models.UserResponse:
     properties:
+      fb_user_id:
+        type: string
       id:
         type: integer
       is_active:
@@ -171,8 +173,6 @@ definitions:
       phone:
         type: string
       radius:
-        type: integer
-      user_id:
         type: integer
     type: object
 host: localhost:8080

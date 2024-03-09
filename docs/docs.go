@@ -721,6 +721,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "fb_user_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -737,9 +740,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -840,6 +840,9 @@ const docTemplate = `{
         "models.UserResponse": {
             "type": "object",
             "properties": {
+                "fb_user_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -859,9 +862,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "radius": {
-                    "type": "integer"
-                },
-                "user_id": {
                     "type": "integer"
                 }
             }

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 
@@ -34,7 +35,7 @@ func UserAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) fu
 			// fmt.Printf("Token: %v\n", tokenWithClaims)
 			logger.Infof("Passed auth token: %s.", token)
 
-			ctx := context.WithValue(r.Context(), "UID", rand.Intn(10000))
+			ctx := context.WithValue(r.Context(), "UID", fmt.Sprint(rand.Intn(10000)))
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))

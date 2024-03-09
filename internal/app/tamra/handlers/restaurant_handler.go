@@ -59,7 +59,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	// It should be loosely coupled and only know about the domain models
 	restaurant := utils.MapCreateRestaurantRequestToRestaurant(createRestaurantRequest)
 	// Extract the user ID from the request context
-	userID, ok := r.Context().Value("UID").(string)
+	firebaseUserID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Error("Context", r.Context())
 		h.logger.Error("failed to get user ID from request context")
@@ -68,7 +68,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurant.UserID = userID
+	restaurant.FBUserID = firebaseUserID
 
 	createdRestaurant, err := h.restaurantService.CreateRestaurant(restaurant)
 	if err != nil {
@@ -138,15 +138,6 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the request context
 	h.logger.Infof("Context: %+v", r.Context())
-	userId, ok := r.Context().Value("UserID").(string)
-
-	if !ok {
-		h.logger.Error("Context", r.Context())
-		h.logger.Error("failed to get user ID from request context")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to get user ID from request context")
-		return
-	}
 
 	updateRestaurantRequest := &models.UpdateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateRestaurantRequest)
@@ -166,7 +157,18 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	}
 
 	restaurant := utils.MapUpdateRestaurantRequestToRestaurant(updateRestaurantRequest)
-	restaurant.UserID = userId
+
+	firebaseUserID, ok := r.Context().Value("UserID").(string)
+
+	if !ok {
+		h.logger.Error("Context", r.Context())
+		h.logger.Error("failed to get user ID from request context")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
+	restaurant.FBUserID = firebaseUserID
 
 	updatedRestaurant, err := h.restaurantService.UpdateRestaurant(restaurant)
 	if err != nil {

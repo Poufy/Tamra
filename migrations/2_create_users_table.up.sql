@@ -6,9 +6,10 @@ CREATE TABLE users (
     phone VARCHAR(255) UNIQUE,
     radius INT NOT NULL,
     last_order_received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id VARCHAR(255) NOT NULL UNIQUE,
+    fb_user_id VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX users_uid_index ON users (fb_user_id);
 CREATE INDEX users_last_order_received_index ON users (last_order_received);
