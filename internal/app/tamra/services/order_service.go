@@ -20,6 +20,12 @@ type OrderService interface {
 	UpdateOrder(order *models.Order) (*models.Order, error)
 	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
+	// AcceptOrder accepts an order
+	AcceptOrder(id int, fbUserID string) error
+	// RejectOrder rejects an order
+	RejectOrder(id int, fbUserID string) error
+	// ReassignOrder reassigns an order
+	ReassignOrder(id int, fbUserID string) error
 }
 
 type OrderServiceImpl struct {
@@ -43,7 +49,7 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	order.Code = utils.GenerateCode()
 
 	// Find which user to send to based on the last_order_received of the user
-	user, err := s.userRepository.GetUserToReceiveOrder()
+	user, err := s.userRepository.GetUserToReceiveOrder(order.RestaurantID)
 	s.logger.Infof("User to receive order: %v", user)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
@@ -104,6 +110,85 @@ func (s *OrderServiceImpl) UpdateOrder(order *models.Order) (*models.Order, erro
 		return nil, fmt.Errorf("failed to update order: %w", err)
 	}
 	return updatedOrder, nil
+}
+
+func (s *OrderServiceImpl) AcceptOrder(id int, fbUserID string) error {
+	// check if the user is the owner of the order
+	isOwner, err := s.orderRepository.IsUserOwnerOfOrder(id, fbUserID)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to check if user is owner of order: %w", err)
+	}
+
+	if !isOwner {
+		return fmt.Errorf("user is not the owner of the order")
+	}
+
+	err = s.orderRepository.UpdateOrderState(id, "ACCEPTED")
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to accept order: %w", err)
+	}
+
+	return nil
+}
+
+func (s *OrderServiceImpl) RejectOrder(id int, fbUserID string) error {
+	// check if the user is the owner of the order
+	isOwner, err := s.orderRepository.IsUserOwnerOfOrder(id, fbUserID)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to check if user is owner of order: %w", err)
+	}
+
+	if !isOwner {
+		return fmt.Errorf("user is not the owner of the order")
+	}
+
+	err = s.orderRepository.UpdateOrderState(id, "REJECTED")
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to reject order: %w", err)
+	}
+
+	return nil
+}
+
+func (s *OrderServiceImpl) ReassignOrder(id int, fbUserID string) error {
+	//! TODO: The updating operations should be done in a transaction
+	// check if the restaurant is the owner of the order
+	isOwner, err := s.orderRepository.IsRestaurantOwnerOfOrder(id, fbUserID)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to check if restaurant is owner of order: %w", err)
+	}
+
+	if !isOwner {
+		return fmt.Errorf("restaurant is not the owner of the order")
+	}
+
+	// Update the order state to "REJECTED"
+	err = s.orderRepository.UpdateOrderState(id, "REJECTED")
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to reassign order: %w", err)
+	}
+
+	// Get the order
+	order, err := s.orderRepository.GetOrder(id)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to get order: %w", err)
+	}
+
+	// Create the new order
+	_, err = s.CreateOrder(order)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to create order: %w", err)
+	}
+
+	return nil
 }
 
 func (s *OrderServiceImpl) DeleteOrder(id int) error {

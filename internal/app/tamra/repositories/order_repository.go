@@ -15,8 +15,14 @@ type OrderRepository interface {
 	GetOrders() ([]*models.Order, error)
 	// UpdateOrder updates an order
 	UpdateOrder(order *models.Order) (*models.Order, error)
+	// UpdateOrderState updates the state of an order
+	UpdateOrderState(id int, state string) error
 	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
+	// Check if the user is the owner of the order
+	IsUserOwnerOfOrder(id int, fbUserID string) (bool, error)
+	// Check if the restaurant is the owner of the order
+	IsRestaurantOwnerOfOrder(id int, fbUserID string) (bool, error)
 }
 
 type OrderRepositoryImpl struct {
@@ -68,6 +74,39 @@ func (r *OrderRepositoryImpl) UpdateOrder(order *models.Order) (*models.Order, e
 	const query = "UPDATE orders SET user_id=$1, restaurant_id=$2, code=$3, state=$4, description=$5, updated_at=CLOCK_TIMESTAMP() WHERE id=$6 RETURNING id, user_id, restaurant_id, code, state, description, created_at, updated_at"
 	err := r.db.QueryRow(query, order.UserID, order.RestaurantID, order.Code, order.State, order.Description, order.ID).Scan(&order.ID, &order.UserID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
 	return order, err
+}
+
+func (r *OrderRepositoryImpl) UpdateOrderState(id int, state string) error {
+	_, err := r.db.Exec("UPDATE orders SET state = $1, updated_at = CLOCK_TIMESTAMP() WHERE id = $2", state, id)
+	return err
+}
+
+func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUserID string) (bool, error) {
+	// Here we verify that the order exists and that the user is the owner of the order
+	// by joining the orders and users table and checking if the user's fb_user_id matches the one in the users table
+	var exists bool
+	vertificationQuery := `
+			SELECT EXISTS (
+				SELECT 1
+				FROM orders o
+				JOIN users u ON o.user_id = u.id
+				WHERE o.id = $1 AND u.fb_user_id = $2
+		)`
+	err := r.db.QueryRow(vertificationQuery, id, fbUserID).Scan(&exists)
+	return exists, err
+}
+
+func (r *OrderRepositoryImpl) IsRestaurantOwnerOfOrder(id int, fbUserID string) (bool, error) {
+	var exists bool
+	vertificationQuery := `
+			SELECT EXISTS (
+				SELECT 1
+				FROM orders o
+				JOIN restaurants r ON o.restaurant_id = r.id
+				WHERE o.id = $1 AND r.fb_user_id = $2
+		)`
+	err := r.db.QueryRow(vertificationQuery, id, fbUserID).Scan(&exists)
+	return exists, err
 }
 
 func (r *OrderRepositoryImpl) DeleteOrder(id int) error {

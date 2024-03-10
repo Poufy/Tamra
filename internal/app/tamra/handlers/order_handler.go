@@ -237,6 +237,116 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
+// AcceptOrder godoc
+//
+//	@Summary		Accept a order
+//	@Description	Accept a order
+//	@Tags			orders
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
+//	@Success		200	{string}	string	"OK"
+//	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		500	{string}	string	"failed to accept order"
+//	@Router			/orders/{id}/accept [patch]
+func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
+	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		h.logger.WithError(err).Error("failed to parse id")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid id")
+		return
+	}
 
+	// Here we would get the user ID from the request context
+	firebaseUserID := r.Context().Value("UID").(string)
+
+	err = h.orderService.AcceptOrder(id, firebaseUserID)
+	if err != nil {
+		h.logger.WithError(err).Error("failed to accept order")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to accept order")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
+}
+
+// RejectOrder godoc
+//
+//	@Summary		Reject a order
+//	@Description	Reject a order
+//	@Tags			orders
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
+//	@Success		200	{string}	string	"OK"
+//	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		500	{string}	string	"failed to reject order"
+//	@Router			/orders/{id}/reject [patch]
+func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
+	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		h.logger.WithError(err).Error("failed to parse id")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid id")
+		return
+	}
+
+	// Here we would get the user ID from the request context
+	firebaseUserID := r.Context().Value("UID").(string)
+
+	err = h.orderService.RejectOrder(id, firebaseUserID)
+	if err != nil {
+		h.logger.WithError(err).Error("failed to reject order")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to reject order")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
+}
+
+// ReassignOrder godoc
+//
+//	@Summary		Reassign a order
+//	@Description	Reassign a order
+//	@Tags			orders
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
+//	@Success		200	{string}	string	"OK"
+//	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		500	{string}	string	"failed to reassign order"
+//	@Router			/orders/{id}/reassign [post]
+func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
+	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		h.logger.WithError(err).Error("failed to parse id")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid id")
+		return
+	}
+
+	firebaseUserID := r.Context().Value("UID").(string)
+
+	err = h.orderService.ReassignOrder(id, firebaseUserID)
+
+	if err != nil {
+		h.logger.WithError(err).Error("failed to reassign order")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to reassign order")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
 }

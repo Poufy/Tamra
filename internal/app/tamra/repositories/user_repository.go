@@ -25,7 +25,7 @@ type UserRepository interface {
 	// UpdateUser updates a user
 	UpdateUser(user *models.User) (*models.User, error)
 	// Retrieve the user that last received an order
-	GetUserToReceiveOrder() (*models.User, error)
+	GetUserToReceiveOrder(restaurantID int) (*models.User, error)
 	// GetUsers returns a list of users
 	GetUsers() ([]*models.User, error)
 }
@@ -92,16 +92,21 @@ func (r *UserRepositoryImpl) UpdateUser(user *models.User) (*models.User, error)
 // GetUserToReceiveOrder retrieves the user that last received an order.
 // Newly created users will be last in line to receive an order as
 // last_order_recieved is set to the current time when the user is created
-func (r *UserRepositoryImpl) GetUserToReceiveOrder() (*models.User, error) {
+// First we get the restaurant location using the restaurantID
+// Then we get the users whose radius covers the restaurant location
+// Then we get the user that last received an order
+// Then we return the user
+func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID int) (*models.User, error) {
 	const query = `
-	SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, fb_user_id, last_order_received, created_at, updated_at 
-	FROM users 
-	WHERE is_active = true 
-	ORDER BY last_order_received 
-	ASC LIMIT 1
+	SELECT u.id, ST_X(u.location::geometry) as longitude, ST_Y(u.location::geometry) as latitude, u.is_active, u.phone, u.radius, u.fcm_token, u.fb_user_id, u.last_order_received, u.created_at, u.updated_at
+	FROM users u
+	JOIN restaurants r ON ST_DWithin(u.location, r.location, u.radius)
+	WHERE r.id = $1
+	ORDER BY u.last_order_received
+	LIMIT 1
 	`
 	user := &models.User{}
-	err := r.db.QueryRow(query).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow(query, restaurantID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 

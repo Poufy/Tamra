@@ -341,6 +341,99 @@ paths:
       summary: Update a order
       tags:
       - orders
+  /orders/{id}/accept:
+    patch:
+      consumes:
+      - application/json
+      description: Accept a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: invalid order ID
+          schema:
+            type: string
+        "500":
+          description: failed to accept order
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Accept a order
+      tags:
+      - orders
+  /orders/{id}/reassign:
+    post:
+      consumes:
+      - application/json
+      description: Reassign a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: invalid order ID
+          schema:
+            type: string
+        "500":
+          description: failed to reassign order
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Reassign a order
+      tags:
+      - orders
+  /orders/{id}/reject:
+    patch:
+      consumes:
+      - application/json
+      description: Reject a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: invalid order ID
+          schema:
+            type: string
+        "500":
+          description: failed to reject order
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Reject a order
+      tags:
+      - orders
   /restaurants:
     post:
       consumes:
