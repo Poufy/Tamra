@@ -11,7 +11,7 @@ import (
 
 type RestaurantService interface {
 	CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
-	GetRestaurant(userId string) (*models.Restaurant, error)
+	GetRestaurant(fbUID string) (*models.Restaurant, error)
 	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 	GetLogoUploadURL(UID, uploadBucketName string) (string, string, error)
 }
@@ -34,8 +34,8 @@ func (s *RestaurantServiceImpl) CreateRestaurant(restaurant *models.Restaurant) 
 	return createdRestaurant, nil
 }
 
-func (s *RestaurantServiceImpl) GetRestaurant(userId string) (*models.Restaurant, error) {
-	restaurant, err := s.restaurantRepository.GetRestaurant(userId)
+func (s *RestaurantServiceImpl) GetRestaurant(fbUID string) (*models.Restaurant, error) {
+	restaurant, err := s.restaurantRepository.GetRestaurant(fbUID)
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
 		return nil, fmt.Errorf("failed to get restaurant: %w", err)

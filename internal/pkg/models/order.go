@@ -6,8 +6,8 @@ import (
 
 type Order struct {
 	ID           int       `json:"id"`
-	UserID       int       `json:"user_id" validate:"required"`
-	RestaurantID int       `json:"restaurant_id" validate:"required"`
+	UserID       string    `json:"user_id" validate:"required"`
+	RestaurantID string    `json:"restaurant_id" validate:"required"`
 	Code         string    `json:"code" validate:"required"`
 	Description  string    `json:"description"`
 	State        string    `json:"state" validate:"required"`
@@ -17,12 +17,12 @@ type Order struct {
 
 type CreateOrderRequest struct {
 	Description  string `json:"description"`
-	RestaurantID int    `json:"restaurant_id" validate:"required"`
+	RestaurantID string `json:"restaurant_id" validate:"required"`
 }
 
 type UpdateOrderRequest struct {
-	UserID       int    `json:"user_id" validate:"required"`
-	RestaurantID int    `json:"restaurant_id" validate:"required"`
+	UserID       string `json:"user_id" validate:"required"`
+	RestaurantID string `json:"restaurant_id" validate:"required"`
 	Code         string `json:"code" validate:"required"`
 	Description  string `json:"description"`
 	State        string `json:"state" validate:"required"`
@@ -30,8 +30,8 @@ type UpdateOrderRequest struct {
 
 type OrderResponse struct {
 	ID           int       `json:"id"`
-	UserID       int       `json:"user_id"`
-	RestaurantID int       `json:"restaurant_id"`
+	UserID       string    `json:"user_id"`
+	RestaurantID string    `json:"restaurant_id"`
 	Code         string    `json:"code"`
 	Description  string    `json:"description"`
 	State        string    `json:"state"`

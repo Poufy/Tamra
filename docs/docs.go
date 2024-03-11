@@ -16,47 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/orders": {
-            "get": {
-                "security": [
-                    {
-                        "jwt": []
-                    }
-                ],
-                "description": "Get a list of all orders",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Get all orders",
-                "responses": {
-                    "200": {
-                        "description": "List of Orders",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Order"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "order not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "failed to get orders",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -107,14 +66,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{id}": {
+        "/orders/restaurant": {
             "get": {
                 "security": [
                     {
                         "jwt": []
                     }
                 ],
-                "description": "Get a order",
+                "description": "Get all orders for a restaurant",
                 "consumes": [
                     "application/json"
                 ],
@@ -124,27 +83,15 @@ const docTemplate = `{
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get a order",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get all orders for a restaurant",
                 "responses": {
                     "200": {
-                        "description": "Order",
+                        "description": "Restaurant Orders",
                         "schema": {
-                            "$ref": "#/definitions/models.Order"
-                        }
-                    },
-                    "400": {
-                        "description": "invalid order ID",
-                        "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Order"
+                            }
                         }
                     },
                     "404": {
@@ -154,13 +101,58 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "failed to get order",
+                        "description": "failed to get orders",
                         "schema": {
                             "type": "string"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/orders/user": {
+            "get": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Get all orders for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get all orders for a user",
+                "responses": {
+                    "200": {
+                        "description": "User Orders",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Order"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "order not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to get orders",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}": {
             "put": {
                 "security": [
                     {
@@ -767,7 +759,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "restaurant_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -843,7 +835,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restaurant_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "state": {
                     "type": "string"
@@ -852,7 +844,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -868,11 +860,8 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "fb_user_id": {
-                    "type": "string"
-                },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "latitude": {
                     "type": "number"
@@ -921,13 +910,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "restaurant_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "state": {
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -987,11 +976,8 @@ const docTemplate = `{
         "models.UserResponse": {
             "type": "object",
             "properties": {
-                "fb_user_id": {
-                    "type": "string"
-                },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "is_active": {
                     "type": "boolean"

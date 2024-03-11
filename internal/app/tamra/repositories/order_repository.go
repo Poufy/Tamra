@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"Tamra/internal/pkg/models"
-	"Tamra/internal/pkg/utils"
 	"database/sql"
 )
 
@@ -10,19 +9,23 @@ type OrderRepository interface {
 	// CreateOrder creates a new order
 	CreateOrder(order *models.Order) (*models.Order, error)
 	// GetOrder returns an order by its ID
-	GetOrder(id int) (*models.Order, error)
-	// GetOrders returns a list of orders
-	GetOrders() ([]*models.Order, error)
+	GetOrder(id int, fbUID string) (*models.Order, error)
+	// GetUserOrders returns a list of orders
+	GetUserOrders(userID string) ([]*models.Order, error)
+	// GetRestaurantOrders returns a list of orders
+	GetRestaurantOrders(restaurantID string) ([]*models.Order, error)
 	// UpdateOrder updates an order
 	UpdateOrder(order *models.Order) (*models.Order, error)
-	// UpdateOrderState updates the state of an order
-	UpdateOrderState(id int, state string) error
+	// UpdateUserOrderState updates the state of an order that belongs to a user
+	UpdateUserOrderState(id int, fbUID string, state string) error
+	// UpdateRestaurantOrderState updates the state of an order that belongs to a restaurant
+	UpdateRestaurantOrderState(id int, fbUID string, state string) error
 	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
 	// Check if the user is the owner of the order
-	IsUserOwnerOfOrder(id int, fbUserID string) (bool, error)
+	IsUserOwnerOfOrder(id int, fbUID string) (bool, error)
 	// Check if the restaurant is the owner of the order
-	IsRestaurantOwnerOfOrder(id int, fbUserID string) (bool, error)
+	IsRestaurantOwnerOfOrder(id int, fbUID string) (bool, error)
 }
 
 type OrderRepositoryImpl struct {
@@ -40,14 +43,14 @@ func (r *OrderRepositoryImpl) CreateOrder(order *models.Order) (*models.Order, e
 	return order, err
 }
 
-func (r *OrderRepositoryImpl) GetOrder(id int) (*models.Order, error) {
+func (r *OrderRepositoryImpl) GetOrder(id int, fbUID string) (*models.Order, error) {
 	order := &models.Order{}
-	err := r.db.QueryRow("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE id = $1", id).Scan(&order.ID, &order.UserID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
+	err := r.db.QueryRow("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE id = $1 AND restaurant_id = $2", id, fbUID).Scan(&order.ID, &order.UserID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
 	return order, err
 }
 
-func (r *OrderRepositoryImpl) GetOrders() ([]*models.Order, error) {
-	rows, err := r.db.Query("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders")
+func (r *OrderRepositoryImpl) GetUserOrders(userID string) ([]*models.Order, error) {
+	rows, err := r.db.Query("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE user_id = $1", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,11 +65,25 @@ func (r *OrderRepositoryImpl) GetOrders() ([]*models.Order, error) {
 		}
 		orders = append(orders, order)
 	}
+	return orders, nil
+}
 
-	if len(orders) == 0 {
-		return nil, utils.ErrNotFound
+func (r *OrderRepositoryImpl) GetRestaurantOrders(restaurantID string) ([]*models.Order, error) {
+	rows, err := r.db.Query("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE restaurant_id = $1", restaurantID)
+	if err != nil {
+		return nil, err
 	}
+	defer rows.Close()
 
+	orders := []*models.Order{}
+	for rows.Next() {
+		order := &models.Order{}
+		err := rows.Scan(&order.ID, &order.UserID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
 	return orders, nil
 }
 
@@ -76,12 +93,19 @@ func (r *OrderRepositoryImpl) UpdateOrder(order *models.Order) (*models.Order, e
 	return order, err
 }
 
-func (r *OrderRepositoryImpl) UpdateOrderState(id int, state string) error {
-	_, err := r.db.Exec("UPDATE orders SET state = $1, updated_at = CLOCK_TIMESTAMP() WHERE id = $2", state, id)
+// Updates the state of an order that belongs to a user
+func (r *OrderRepositoryImpl) UpdateUserOrderState(id int, fbUID string, state string) error {
+	_, err := r.db.Exec("UPDATE orders SET state = $1 WHERE id = $2 AND user_id = $3", state, id, fbUID)
 	return err
 }
 
-func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUserID string) (bool, error) {
+// Updates the state of an order that belongs to a restaurant
+func (r *OrderRepositoryImpl) UpdateRestaurantOrderState(id int, fbUID string, state string) error {
+	_, err := r.db.Exec("UPDATE orders SET state = $1 WHERE id = $2 AND restaurant_id = $3", state, id, fbUID)
+	return err
+}
+
+func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUID string) (bool, error) {
 	// Here we verify that the order exists and that the user is the owner of the order
 	// by joining the orders and users table and checking if the user's fb_user_id matches the one in the users table
 	var exists bool
@@ -92,11 +116,11 @@ func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUserID string) (bool,
 				JOIN users u ON o.user_id = u.id
 				WHERE o.id = $1 AND u.fb_user_id = $2
 		)`
-	err := r.db.QueryRow(vertificationQuery, id, fbUserID).Scan(&exists)
+	err := r.db.QueryRow(vertificationQuery, id, fbUID).Scan(&exists)
 	return exists, err
 }
 
-func (r *OrderRepositoryImpl) IsRestaurantOwnerOfOrder(id int, fbUserID string) (bool, error) {
+func (r *OrderRepositoryImpl) IsRestaurantOwnerOfOrder(id int, fbUID string) (bool, error) {
 	var exists bool
 	vertificationQuery := `
 			SELECT EXISTS (
@@ -105,7 +129,7 @@ func (r *OrderRepositoryImpl) IsRestaurantOwnerOfOrder(id int, fbUserID string) 
 				JOIN restaurants r ON o.restaurant_id = r.id
 				WHERE o.id = $1 AND r.fb_user_id = $2
 		)`
-	err := r.db.QueryRow(vertificationQuery, id, fbUserID).Scan(&exists)
+	err := r.db.QueryRow(vertificationQuery, id, fbUID).Scan(&exists)
 	return exists, err
 }
 

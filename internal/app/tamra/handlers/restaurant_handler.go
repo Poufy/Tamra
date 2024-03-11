@@ -68,7 +68,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurant.FBUserID = firebaseUserID
+	restaurant.ID = firebaseUserID
 
 	createdRestaurant, err := h.restaurantService.CreateRestaurant(restaurant)
 	if err != nil {
@@ -95,16 +95,16 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 //	@Router			/restaurants/me [get]
 func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the request context
-	userID := r.Context().Value("UserID").(string)
+	fbUID := r.Context().Value("UID").(string)
 
-	if userID == "" {
+	if fbUID == "" {
 		h.logger.Error("failed to get user ID from request context")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
 	}
 
-	restaurant, err := h.restaurantService.GetRestaurant(userID)
+	restaurant, err := h.restaurantService.GetRestaurant(fbUID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			h.logger.WithError(err).Error("restaurant not found")
@@ -168,7 +168,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurant.FBUserID = firebaseUserID
+	restaurant.ID = firebaseUserID
 
 	updatedRestaurant, err := h.restaurantService.UpdateRestaurant(restaurant)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"Tamra/internal/pkg/models"
 	"Tamra/internal/pkg/utils"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -12,20 +13,20 @@ import (
 type OrderService interface {
 	// CreateOrder creates a new order
 	CreateOrder(order *models.Order) (*models.Order, error)
-	// GetOrder returns an order by its ID
-	GetOrder(id int) (*models.Order, error)
-	// GetOrders returns a list of orders
-	GetOrders() ([]*models.Order, error)
+	// GetUserOrders returns a list of orders
+	GetUserOrders(userID string) ([]*models.Order, error)
+	// GetRestaurantOrders returns a list of orders
+	GetRestaurantOrders(restaurantID string) ([]*models.Order, error)
 	// UpdateOrder updates an order
 	UpdateOrder(order *models.Order) (*models.Order, error)
 	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
 	// AcceptOrder accepts an order
-	AcceptOrder(id int, fbUserID string) error
+	AcceptOrder(id int, fbUID string) error
 	// RejectOrder rejects an order
-	RejectOrder(id int, fbUserID string) error
+	RejectOrder(id int, fbUID string) error
 	// ReassignOrder reassigns an order
-	ReassignOrder(id int, fbUserID string) error
+	ReassignOrder(id int, fbUID string) error
 }
 
 type OrderServiceImpl struct {
@@ -52,7 +53,7 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	user, err := s.userRepository.GetUserToReceiveOrder(order.RestaurantID)
 	s.logger.Infof("User to receive order: %v", user)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return nil, fmt.Errorf("failed to get user to receive order: %w", err)
 	}
 
@@ -61,7 +62,6 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	order, err = s.orderRepository.CreateOrder(order)
 	s.logger.Infof("Order created: %v", order)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
 		return nil, fmt.Errorf("failed to create order: %w", err)
 	}
 
@@ -70,7 +70,7 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	err = NotifyUser(user.FCMToken, order)
 	s.logger.Info("User notified")
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return nil, fmt.Errorf("failed to notify user: %w", err)
 	}
 
@@ -78,27 +78,45 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	user.LastOrderReceived = order.CreatedAt
 	_, err = s.userRepository.UpdateUser(user)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return order, nil
 }
 
-func (s *OrderServiceImpl) GetOrder(id int) (*models.Order, error) {
-	order, err := s.orderRepository.GetOrder(id)
+func (s *OrderServiceImpl) GetUserOrders(userID string) ([]*models.Order, error) {
+	orders, err := s.orderRepository.GetUserOrders(userID)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return nil, fmt.Errorf("failed to get order: %w", err)
+		return nil, fmt.Errorf("failed to get user orders: %w", err)
 	}
-	return order, nil
+
+	// Iterate over the orders and if the time since the order was created is more than 15 minutes, we update the order state to "REJECTED"
+	for _, order := range orders {
+		if order.CreatedAt.Add(15 * time.Minute).Before(time.Now()) {
+			s.logger.Infof("Order %d is more than 15 minutes old. Rejecting it", order.ID)
+			// Update the order state to "REJECTED". We could have used UpdateUserOrderState as well. It doesn't matter.
+			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "REJECTED")
+			if err != nil {
+				return nil, fmt.Errorf("failed to reject order: %w", err)
+			}
+		}
+	}
+
+	// Get the updated list of orders
+	orders, err = s.orderRepository.GetUserOrders(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user orders: %w", err)
+	}
+
+	return orders, nil
 }
 
-func (s *OrderServiceImpl) GetOrders() ([]*models.Order, error) {
-	orders, err := s.orderRepository.GetOrders()
+func (s *OrderServiceImpl) GetRestaurantOrders(restaurantID string) ([]*models.Order, error) {
+	orders, err := s.orderRepository.GetRestaurantOrders(restaurantID)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return nil, fmt.Errorf("failed to get orders: %w", err)
+
+		return nil, fmt.Errorf("failed to get restaurant orders: %w", err)
 	}
 	return orders, nil
 }
@@ -106,85 +124,51 @@ func (s *OrderServiceImpl) GetOrders() ([]*models.Order, error) {
 func (s *OrderServiceImpl) UpdateOrder(order *models.Order) (*models.Order, error) {
 	updatedOrder, err := s.orderRepository.UpdateOrder(order)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return nil, fmt.Errorf("failed to update order: %w", err)
 	}
 	return updatedOrder, nil
 }
 
-func (s *OrderServiceImpl) AcceptOrder(id int, fbUserID string) error {
-	// check if the user is the owner of the order
-	isOwner, err := s.orderRepository.IsUserOwnerOfOrder(id, fbUserID)
+func (s *OrderServiceImpl) AcceptOrder(id int, fbUID string) error {
+	err := s.orderRepository.UpdateUserOrderState(id, fbUID, "ACCEPTED")
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to check if user is owner of order: %w", err)
-	}
 
-	if !isOwner {
-		return fmt.Errorf("user is not the owner of the order")
-	}
-
-	err = s.orderRepository.UpdateOrderState(id, "ACCEPTED")
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
 		return fmt.Errorf("failed to accept order: %w", err)
 	}
 
 	return nil
 }
 
-func (s *OrderServiceImpl) RejectOrder(id int, fbUserID string) error {
-	// check if the user is the owner of the order
-	isOwner, err := s.orderRepository.IsUserOwnerOfOrder(id, fbUserID)
+func (s *OrderServiceImpl) RejectOrder(id int, fbUID string) error {
+	err := s.orderRepository.UpdateUserOrderState(id, fbUID, "REJECTED")
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to check if user is owner of order: %w", err)
-	}
 
-	if !isOwner {
-		return fmt.Errorf("user is not the owner of the order")
-	}
-
-	err = s.orderRepository.UpdateOrderState(id, "REJECTED")
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
 		return fmt.Errorf("failed to reject order: %w", err)
 	}
 
 	return nil
 }
 
-func (s *OrderServiceImpl) ReassignOrder(id int, fbUserID string) error {
-	//! TODO: The updating operations should be done in a transaction
-	// check if the restaurant is the owner of the order
-	isOwner, err := s.orderRepository.IsRestaurantOwnerOfOrder(id, fbUserID)
-	if err != nil {
-		// Wrap the error returned by the repository and add some context
-		return fmt.Errorf("failed to check if restaurant is owner of order: %w", err)
-	}
-
-	if !isOwner {
-		return fmt.Errorf("restaurant is not the owner of the order")
-	}
-
+func (s *OrderServiceImpl) ReassignOrder(id int, fbUID string) error {
 	// Update the order state to "REJECTED"
-	err = s.orderRepository.UpdateOrderState(id, "REJECTED")
+	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "REJECTED")
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return fmt.Errorf("failed to reassign order: %w", err)
 	}
 
 	// Get the order
-	order, err := s.orderRepository.GetOrder(id)
+	order, err := s.orderRepository.GetOrder(id, fbUID)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return fmt.Errorf("failed to get order: %w", err)
 	}
 
 	// Create the new order
 	_, err = s.CreateOrder(order)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return fmt.Errorf("failed to create order: %w", err)
 	}
 
@@ -194,7 +178,7 @@ func (s *OrderServiceImpl) ReassignOrder(id int, fbUserID string) error {
 func (s *OrderServiceImpl) DeleteOrder(id int) error {
 	err := s.orderRepository.DeleteOrder(id)
 	if err != nil {
-		// Wrap the error returned by the repository and add some context
+
 		return fmt.Errorf("failed to delete order: %w", err)
 	}
 	return nil

@@ -2,8 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 	"net/http"
 
 	"firebase.google.com/go/auth"
@@ -25,17 +23,16 @@ func UserAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) fu
 
 			// Verify the token.
 			// TODO: what is the use of the context.Background()?
-			// tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
-			// if err != nil {
-			// 	http.Error(w, "unauthorized", http.StatusUnauthorized)
-			// 	return
-			// }
+			tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
+			if err != nil {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
 
 			// Print all token details
 			// fmt.Printf("Token: %v\n", tokenWithClaims)
-			logger.Infof("Passed auth token: %s.", token)
-
-			ctx := context.WithValue(r.Context(), "UID", fmt.Sprint(rand.Intn(10000)))
+			logger.Infof("Passed auth token: %+v.", tokenWithClaims)
+			ctx := context.WithValue(r.Context(), "UID", tokenWithClaims.UID)
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -56,18 +53,25 @@ func RestaurantAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogg
 
 			// Verify the token.
 			// TODO: what is the use of the context.Background()?
-			// tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
-			// if err != nil {
-			// 	http.Error(w, "unauthorized", http.StatusUnauthorized)
-			// 	return
-			// }
+			tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
+			if err != nil {
+				logger.Error("Failed to verify token: %v", err)
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
 
-			// Print all token details
-			// Pass a claim to indicate that the user is a restaurant. maybe it can be 'restaurant' or 'user'
-			// fmt.Printf("Token: %v\n", tokenWithClaims)
-			logger.Infof("Passed auth token: %s.", token)
+			// Check if the claims contain an email
+			// If the claims contain an email, we can assume that the user is a restaurant
+			if tokenWithClaims.Claims["email"] == nil {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
 
-			ctx := context.WithValue(r.Context(), "UID", "1234")
+			logger.Info("Passed auth token: %+v.", tokenWithClaims)
+			// print the email
+			logger.Info("Email: %v", tokenWithClaims.Claims["email"])
+
+			ctx := context.WithValue(r.Context(), "UID", tokenWithClaims.UID)
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))

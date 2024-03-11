@@ -69,11 +69,13 @@ func main() {
 	userAuthMiddleware := middleware.UserAuthMiddleware(firebaseAuth, logger)
 	restaurantAuthMiddleware := middleware.RestaurantAuthMiddleware(firebaseAuth, logger)
 
+	logger.Info("Starting the server")
 	userRouter := routes.NewUserRouter(userHandler, userAuthMiddleware, logger)
 	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, restaurantAuthMiddleware, logger)
-	orderRouter := routes.NewOrderRouter(orderHandler, restaurantAuthMiddleware, logger)
+	orderRouter := routes.NewOrderRouter(orderHandler, restaurantAuthMiddleware, userAuthMiddleware, logger)
 	docsRouter := routes.NewDocsRouter(logger)
 
+	logger.Info("Creating a new chi router")
 	// Create a new chi router
 	r := chi.NewRouter()
 
@@ -82,12 +84,14 @@ func main() {
 	r.Mount("/orders", orderRouter.GetRouter())
 	r.Mount("/docs", docsRouter.GetRouter())
 
+	logger.Info("Mounting the subrouter to the parent router")
 	// Mount the subrouter to the parent router
 	// We create a new router for the versioned API and mount the subrouter to it
 	// if we were to use the same router r like r.Mount("/api/v1", r), routers like "/users" would still be accessible
 	versionedRouter := chi.NewRouter()
 	versionedRouter.Mount("/api/v1", r)
 
+	logger.Info("Starting the server")
 	// Start the server with the port from the configuration and cast the port to a string
 	strPort := ":" + strconv.Itoa(config.Port)
 

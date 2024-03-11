@@ -60,6 +60,10 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	order := utils.MapCreateOrderRequestToOrder(createOrderRequest)
 
+	firebaseUserID := r.Context().Value("UID").(string)
+
+	order.RestaurantID = firebaseUserID
+
 	createdOrder, err := h.orderService.CreateOrder(order)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to create order")
@@ -72,20 +76,23 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(createdOrder)
 }
 
-// GetOrders godoc
+// GetUserOrders
 //
-//	@Summary		Get all orders
-//	@Description	Get a list of all orders
+//	@Summary		Get all orders for a user
+//	@Description	Get all orders for a user
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
 //	@Security		jwt
-//	@Success		200	{array}		models.Order	"List of Orders"
+//	@Success		200	{array}		models.Order	"User Orders"
 //	@Failure		404	{string}	string			"order not found"
 //	@Failure		500	{string}	string			"failed to get orders"
-//	@Router			/orders [get]
-func (h *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	orders, err := h.orderService.GetOrders()
+//	@Router			/orders/user [get]
+func (h *OrderHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
+	// Here we would get the user ID from the request context
+	fbUserID := r.Context().Value("UID").(string)
+
+	orders, err := h.orderService.GetUserOrders(fbUserID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			h.logger.WithError(err).Error("order not found")
@@ -103,30 +110,23 @@ func (h *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(orders)
 }
 
-// GetOrder godoc
+// GetRestaurantOrders
 //
-//	@Summary		Get a order
-//	@Description	Get a order
+//	@Summary		Get all orders for a restaurant
+//	@Description	Get all orders for a restaurant
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"Order ID"
 //	@Security		jwt
-//	@Success		200	{object}	models.Order	"Order"
-//	@Failure		400	{string}	string			"invalid order ID"
+//	@Success		200	{array}		models.Order	"Restaurant Orders"
 //	@Failure		404	{string}	string			"order not found"
-//	@Failure		500	{string}	string			"failed to get order"
-//	@Router			/orders/{id} [get]
-func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "invalid id")
-		return
-	}
+//	@Failure		500	{string}	string			"failed to get orders"
+//	@Router			/orders/restaurant [get]
+func (h *OrderHandler) GetRestaurantOrders(w http.ResponseWriter, r *http.Request) {
+	// Here we would get the user ID from the request context
+	fbUserID := r.Context().Value("UID").(string)
 
-	order, err := h.orderService.GetOrder(id)
+	orders, err := h.orderService.GetRestaurantOrders(fbUserID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			h.logger.WithError(err).Error("order not found")
@@ -134,14 +134,14 @@ func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "order not found")
 			return
 		}
-		h.logger.WithError(err).Error("failed to get order")
+		h.logger.WithError(err).Error("failed to get orders")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "failed to get order")
+		fmt.Fprint(w, "failed to get orders")
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(order)
+	json.NewEncoder(w).Encode(orders)
 }
 
 // UpdateOrder godoc

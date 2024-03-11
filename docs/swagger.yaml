@@ -5,7 +5,7 @@ definitions:
       description:
         type: string
       restaurant_id:
-        type: integer
+        type: string
     required:
     - restaurant_id
     type: object
@@ -55,13 +55,13 @@ definitions:
       id:
         type: integer
       restaurant_id:
-        type: integer
+        type: string
       state:
         type: string
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     required:
     - code
     - restaurant_id
@@ -72,10 +72,8 @@ definitions:
     properties:
       created_at:
         type: string
-      fb_user_id:
-        type: string
       id:
-        type: integer
+        type: string
       latitude:
         type: number
       logo_url:
@@ -108,11 +106,11 @@ definitions:
       description:
         type: string
       restaurant_id:
-        type: integer
+        type: string
       state:
         type: string
       user_id:
-        type: integer
+        type: string
     required:
     - code
     - restaurant_id
@@ -158,10 +156,8 @@ definitions:
     type: object
   models.UserResponse:
     properties:
-      fb_user_id:
-        type: string
       id:
-        type: integer
+        type: string
       is_active:
         type: boolean
       last_order_received:
@@ -183,32 +179,6 @@ info:
   version: "1"
 paths:
   /orders:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all orders
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of Orders
-          schema:
-            items:
-              $ref: '#/definitions/models.Order'
-            type: array
-        "404":
-          description: order not found
-          schema:
-            type: string
-        "500":
-          description: failed to get orders
-          schema:
-            type: string
-      security:
-      - jwt: []
-      summary: Get all orders
-      tags:
-      - orders
     post:
       consumes:
       - application/json
@@ -269,40 +239,6 @@ paths:
       security:
       - jwt: []
       summary: Delete a order
-      tags:
-      - orders
-    get:
-      consumes:
-      - application/json
-      description: Get a order
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Order
-          schema:
-            $ref: '#/definitions/models.Order'
-        "400":
-          description: invalid order ID
-          schema:
-            type: string
-        "404":
-          description: order not found
-          schema:
-            type: string
-        "500":
-          description: failed to get order
-          schema:
-            type: string
-      security:
-      - jwt: []
-      summary: Get a order
       tags:
       - orders
     put:
@@ -432,6 +368,60 @@ paths:
       security:
       - jwt: []
       summary: Reject a order
+      tags:
+      - orders
+  /orders/restaurant:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders for a restaurant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Restaurant Orders
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "404":
+          description: order not found
+          schema:
+            type: string
+        "500":
+          description: failed to get orders
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Get all orders for a restaurant
+      tags:
+      - orders
+  /orders/user:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User Orders
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "404":
+          description: order not found
+          schema:
+            type: string
+        "500":
+          description: failed to get orders
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Get all orders for a user
       tags:
       - orders
   /restaurants:

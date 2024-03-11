@@ -25,7 +25,7 @@ type UserRepository interface {
 	// UpdateUser updates a user
 	UpdateUser(user *models.User) (*models.User, error)
 	// Retrieve the user that last received an order
-	GetUserToReceiveOrder(restaurantID int) (*models.User, error)
+	GetUserToReceiveOrder(restaurantID string) (*models.User, error)
 	// GetUsers returns a list of users
 	GetUsers() ([]*models.User, error)
 }
@@ -39,14 +39,14 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *UserRepositoryImpl) CreateUser(user *models.User) (*models.User, error) {
-	const query = "INSERT INTO users (location, is_active, phone, radius, fcm_token, fb_user_id ,last_order_received, created_at, updated_at) VALUES (ST_SetSRID(ST_MakePoint($1, $2), 4326), $3, $4, $5, $6, $7, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, fb_user_id, last_order_received, created_at, updated_at"
-	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken, user.FBUserID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	const query = "INSERT INTO users (id, location, is_active, phone, radius, fcm_token ,last_order_received, created_at, updated_at) VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, $5, $6, $7, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at"
+	err := r.db.QueryRow(query, user.ID, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 
 func (r *UserRepositoryImpl) GetUser(userId string) (*models.User, error) {
 	user := &models.User{}
-	err := r.db.QueryRow("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, fb_user_id, last_order_received, created_at, updated_at FROM users WHERE fb_user_id = $1", userId).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at FROM users WHERE id = $1", userId).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	// Return a custom error if the user is not found so that the service or handler can handle it.
 	// In this case we want to return a 404 status code
 	if err == sql.ErrNoRows {
@@ -54,13 +54,11 @@ func (r *UserRepositoryImpl) GetUser(userId string) (*models.User, error) {
 	}
 
 	logrus.Info("User: ", user)
-	logrus.Info("User id: ", user.FBUserID)
-
 	return user, err
 }
 
 func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
-	rows, err := r.db.Query("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, fb_user_id, last_order_received, created_at, updated_at FROM users")
+	rows, err := r.db.Query("SELECT id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +67,7 @@ func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
 	users := []*models.User{}
 	for rows.Next() {
 		user := &models.User{}
-		err := rows.Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -84,8 +82,8 @@ func (r *UserRepositoryImpl) GetUsers() ([]*models.User, error) {
 }
 
 func (r *UserRepositoryImpl) UpdateUser(user *models.User) (*models.User, error) {
-	const query = "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326), is_active = $3, phone = $4, radius = $5, fcm_token = $6, last_order_received = $7, updated_at = CLOCK_TIMESTAMP() WHERE fb_user_id = $8 RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, fb_user_id, last_order_received, created_at, updated_at"
-	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken, user.LastOrderReceived, user.FBUserID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	const query = "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326), is_active = $3, phone = $4, radius = $5, fcm_token = $6, last_order_received = $7, updated_at = CLOCK_TIMESTAMP() WHERE id = $8 RETURNING id, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, is_active, phone, radius, fcm_token, last_order_received, created_at, updated_at"
+	err := r.db.QueryRow(query, user.Longitude, user.Latitude, user.IsActive, user.Phone, user.Radius, user.FCMToken, user.LastOrderReceived, user.ID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 
@@ -96,9 +94,10 @@ func (r *UserRepositoryImpl) UpdateUser(user *models.User) (*models.User, error)
 // Then we get the users whose radius covers the restaurant location
 // Then we get the user that last received an order
 // Then we return the user
-func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID int) (*models.User, error) {
+func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID string) (*models.User, error) {
+	// TODO: measure the performance of this query and see if it can be optimized
 	const query = `
-	SELECT u.id, ST_X(u.location::geometry) as longitude, ST_Y(u.location::geometry) as latitude, u.is_active, u.phone, u.radius, u.fcm_token, u.fb_user_id, u.last_order_received, u.created_at, u.updated_at
+	SELECT u.id, ST_X(u.location::geometry) as longitude, ST_Y(u.location::geometry) as latitude, u.is_active, u.phone, u.radius, u.fcm_token, u.last_order_received, u.created_at, u.updated_at
 	FROM users u
 	JOIN restaurants r ON ST_DWithin(u.location, r.location, u.radius)
 	WHERE r.id = $1
@@ -106,7 +105,7 @@ func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID int) (*models.Us
 	LIMIT 1
 	`
 	user := &models.User{}
-	err := r.db.QueryRow(query, restaurantID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.FBUserID, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow(query, restaurantID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
 

@@ -72,7 +72,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.FBUserID = firebaseUserID
+	user.ID = firebaseUserID
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to create user")
@@ -164,7 +164,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	user := utils.MapUpdateUserRequestToUser(updateUserRequest)
 
-	firebaseUserID, ok := r.Context().Value("UID").(string)
+	fbUID, ok := r.Context().Value("UID").(string)
 
 	if !ok {
 		h.logger.Error("failed to get user ID from request context")
@@ -174,7 +174,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set the ID of the user to the ID from the URL
-	user.FBUserID = firebaseUserID
+	user.ID = fbUID
 
 	updatedUser, err := h.userService.UpdateUser(user)
 	if err != nil {

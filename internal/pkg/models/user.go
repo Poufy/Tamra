@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID                int       `json:"id"`
+	ID                string    `json:"id"`
 	Longitude         float64   `json:"longitude" validate:"required"`
 	Latitude          float64   `json:"latitude" validate:"required"`
 	IsActive          bool      `json:"is_active"`
@@ -13,7 +13,6 @@ type User struct {
 	Radius            int       `json:"radius" validate:"required"`
 	FCMToken          string    `json:"fcm_token" validate:"required"`
 	LastOrderReceived time.Time `json:"last_order_received"`
-	FBUserID          string    `json:"fb_user_id"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
@@ -36,12 +35,11 @@ type UpdateUserRequest struct {
 }
 
 type UserResponse struct {
-	ID                int       `json:"id"`
+	ID                string    `json:"id"`
 	Longitude         float64   `json:"longitude"`
 	Latitude          float64   `json:"latitude"`
 	IsActive          bool      `json:"is_active"`
 	Phone             string    `json:"phone"`
 	Radius            int       `json:"radius"`
 	LastOrderReceived time.Time `json:"last_order_received"`
-	FBUserID          string    `json:"fb_user_id"`
 }
