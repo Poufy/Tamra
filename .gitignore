@@ -1,3 +1,4 @@
 .air.toml
 firebaseConfig.json
 bin
+.env

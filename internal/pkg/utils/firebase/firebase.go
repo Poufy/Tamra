@@ -6,13 +6,12 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
-
 	"google.golang.org/api/option"
 )
 
-func NewFirebaseAuth(configFile string) (*auth.Client, error) {
+func NewFirebaseAuth(configJSON string) (*auth.Client, error) {
 	// Load the Firebase configuration from the file
-	opt := option.WithCredentialsFile(configFile)
+	opt := option.WithCredentialsJSON([]byte(configJSON))
 
 	// NewApp will first look for the FIREBASE_CONFIG environment variable.
 	app, err := firebase.NewApp(context.Background(), nil, opt)

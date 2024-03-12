@@ -144,22 +144,6 @@ func (h *OrderHandler) GetRestaurantOrders(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(orders)
 }
 
-// UpdateOrder godoc
-//
-//	@Summary		Update a order
-//	@Description	Update a order
-//	@Tags			orders
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path	int							true	"Order ID"
-//	@Param			order	body	models.UpdateOrderRequest	true	"Order data to be updated"
-//	@Security		jwt
-//	@Success		200	{object}	models.Order	"Updated Order"
-//	@Failure		400	{string}	string			"invalid order ID"
-//	@Failure		400	{string}	string			"invalid request body"
-//	@Failure		500	{string}	string			"failed to decode request body"
-//	@Failure		500	{string}	string			"failed to update order"
-//	@Router			/orders/{id} [put]
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -204,19 +188,6 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedOrder)
 }
 
-// DeleteOrder godoc
-//
-//	@Summary		Delete a order
-//	@Description	Delete a order
-//	@Tags			orders
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path	int	true	"Order ID"
-//	@Security		jwt
-//	@Success		204	{string}	string	"No Content"
-//	@Failure		400	{string}	string	"invalid order ID"
-//	@Failure		500	{string}	string	"failed to delete order"
-//	@Router			/orders/{id} [delete]
 func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

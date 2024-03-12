@@ -99,24 +99,6 @@ definitions:
       stored_file_url:
         type: string
     type: object
-  models.UpdateOrderRequest:
-    properties:
-      code:
-        type: string
-      description:
-        type: string
-      restaurant_id:
-        type: string
-      state:
-        type: string
-      user_id:
-        type: string
-    required:
-    - code
-    - restaurant_id
-    - state
-    - user_id
-    type: object
   models.UpdateRestaurantRequest:
     properties:
       latitude:
@@ -208,73 +190,6 @@ paths:
       security:
       - jwt: []
       summary: Create a new order
-      tags:
-      - orders
-  /orders/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a order
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "400":
-          description: invalid order ID
-          schema:
-            type: string
-        "500":
-          description: failed to delete order
-          schema:
-            type: string
-      security:
-      - jwt: []
-      summary: Delete a order
-      tags:
-      - orders
-    put:
-      consumes:
-      - application/json
-      description: Update a order
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Order data to be updated
-        in: body
-        name: order
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateOrderRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Updated Order
-          schema:
-            $ref: '#/definitions/models.Order'
-        "400":
-          description: invalid request body
-          schema:
-            type: string
-        "500":
-          description: failed to update order
-          schema:
-            type: string
-      security:
-      - jwt: []
-      summary: Update a order
       tags:
       - orders
   /orders/{id}/accept:

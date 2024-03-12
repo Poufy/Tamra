@@ -1,0 +1,97 @@
+service: carex-zoom-auth
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: provided.al2
+  architecture: arm64
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'}
+  stack:
+    name: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+    tags:
+      Environment: ${self:provider.stage}
+      ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+  tags:
+    Environment: ${self:provider.stage}
+    ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+
+custom:
+  SERVICE_NAME: tamra
+  LOG_LEVEL:
+    dev: debug
+    prod: info
+
+package:
+  patterns:
+    - "!./**"
+    - ./bin/**
+
+functions:
+  tamra:
+    handler: bootstrap
+    package:
+      artifact: bin/tamra.zip
+    environment:
+      DB_CONNECTION_STRING: ${ssm:/tamra/db_connection_string_${self:provider.stage}}
+      FIREBASE_CONFIG_JSON: ${ssm:/tamra/firebase_config_json}
+      LOG_LEVEL: ${self:custom.LOG_LEVEL.${self:provider.stage}} 
+
+    events:
+      - http:
+          path: /users
+          method: post
+          cors: true
+      - http:
+          path: /users
+          method: get
+          cors: true
+      - http:
+          path: /users/me
+          method: get
+          cors: true
+      - http:
+          path: /users/me
+          method: patch
+          cors: true
+      - http:
+          path: /restaurants
+          method: post
+          cors: true
+      - http:
+          path: /restaurants/me
+          method: get
+          cors: true
+      - http:
+          path: /restaurants/me
+          method: patch
+          cors: true
+      - http:
+          path: /restaurants/logo/uploadurl
+          method: get
+          cors: true
+      - http:
+          path: /orders
+          method: post
+          cors: true
+      - http:
+          path: /orders/restaurant
+          method: get
+          cors: true
+      - http:
+          path: /orders/user
+          method: get
+          cors: true
+      - http:
+          path: /orders/{id}/accept
+          method: patch
+          cors: true
+      - http:
+          path: /orders/{id}/reject
+          method: patch
+          cors: true
+      - http:
+          path: /orders/{id}/reassign
+          method: post
+          cors: true

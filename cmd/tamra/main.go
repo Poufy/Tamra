@@ -7,14 +7,18 @@ import (
 	"Tamra/internal/app/tamra/routes"
 	"Tamra/internal/app/tamra/services"
 	"Tamra/internal/pkg/utils"
+	"net/http"
+	"os"
+	"strconv"
 
 	"Tamra/internal/pkg/utils/firebase"
 	"fmt"
-	"net/http"
-	"strconv"
 
+	"github.com/aws/aws-lambda-go/lambda"
+	chiadapter "github.com/awslabs/aws-lambda-go-api-proxy/chi"
 	"github.com/go-chi/chi/v5"
-	// "github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 //	@title						Tamra API
@@ -34,6 +38,11 @@ import (
 //	@produce					json
 //	@consumes					json
 func main() {
+	// Load the environment variables from the .env file
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
 	// Read the configuration
 	config := utils.GetConfig()
 
@@ -45,8 +54,11 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Configuration values before initializing firebase auth", config.FirebaseConfig)
-	firebaseAuth, err := firebase.NewFirebaseAuth(config.FirebaseConfig)
+	fmt.Println("Configuration values before initializing firebase auth", config.FirebaseConfigJSON)
+	firebaseAuth, err := firebase.NewFirebaseAuth(config.FirebaseConfigJSON)
+	if err != nil {
+		logrus.Panic("Failed to initialize firebase auth: ", err)
+	}
 
 	// Get the validator
 	validator := utils.NewValidator()
@@ -91,9 +103,13 @@ func main() {
 	versionedRouter := chi.NewRouter()
 	versionedRouter.Mount("/api/v1", r)
 
-	logger.Info("Starting the server")
-	// Start the server with the port from the configuration and cast the port to a string
-	strPort := ":" + strconv.Itoa(config.Port)
-
-	http.ListenAndServe(strPort, versionedRouter)
+	if os.Getenv("AWS_LAMBDA") == "TRUE" {
+		// If we are running on AWS Lambda, we use the chiadapter to convert the chi router to a lambda handler
+		chiLambda := chiadapter.New(versionedRouter)
+		lambda.Start(chiLambda.Proxy)
+	} else {
+		// If we are not running on AWS Lambda, we start the server using the port from the configuration
+		strPort := ":" + strconv.Itoa(config.Port)
+		http.ListenAndServe(strPort, versionedRouter)
+	}
 }

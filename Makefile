@@ -33,7 +33,7 @@ swagger:
 
 local:
 	@echo "Running the application locally..."
-	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable -firebase-config=firebaseConfig.json
+	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable
 
 all : swagger local
 .PHONY: migrate-up migrate-down docker-up docker-down swagger local docker-up-db docker-down-db
