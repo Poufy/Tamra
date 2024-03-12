@@ -2,8 +2,6 @@ module Tamra
 
 go 1.21
 
-toolchain go1.21.0
-
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/aws/aws-lambda-go v1.46.0
