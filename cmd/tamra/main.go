@@ -54,7 +54,10 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Configuration values before initializing firebase auth", config.FirebaseConfigJSON)
+	// Get the logger
+	logger := utils.NewLogger(config.LogLevel)
+
+	logger.Info("Configuration values before initializing firebase auth", config.FirebaseConfigJSON)
 	firebaseAuth, err := firebase.NewFirebaseAuth(config.FirebaseConfigJSON)
 	if err != nil {
 		logrus.Panic("Failed to initialize firebase auth: ", err)
@@ -62,9 +65,6 @@ func main() {
 
 	// Get the validator
 	validator := utils.NewValidator()
-
-	// Get the logger
-	logger := utils.NewLogger(config.LogLevel)
 
 	userRepository := repositories.NewUserRepository(db)
 	restaurantRepository := repositories.NewRestaurantRepository(db)
@@ -101,7 +101,9 @@ func main() {
 	// We create a new router for the versioned API and mount the subrouter to it
 	// if we were to use the same router r like r.Mount("/api/v1", r), routers like "/users" would still be accessible
 	versionedRouter := chi.NewRouter()
-	versionedRouter.Mount("/api/v1", r)
+
+	route := fmt.Sprintf("/%s/api/v1", config.Stage)
+	versionedRouter.Mount(route, r)
 
 	if os.Getenv("AWS_LAMBDA") == "TRUE" {
 		// If we are running on AWS Lambda, we use the chiadapter to convert the chi router to a lambda handler
