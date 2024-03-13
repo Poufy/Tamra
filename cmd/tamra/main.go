@@ -40,7 +40,7 @@ import (
 //	@consumes					json
 func main() {
 	// Load the environment variables from the .env file
-	if os.Getenv("AWS_LAMBDA") != "TRUE" {
+	if os.Getenv("LAMBDA_TASK_ROOT") == "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println("Error loading .env file")
@@ -114,7 +114,7 @@ func main() {
 
 	versionedRouter.Mount("/api/v1", r)
 
-	if os.Getenv("AWS_LAMBDA") == "TRUE" {
+	if os.Getenv("LAMBDA_TASK_ROOT") != "" {
 		// If we are running on AWS Lambda, we use the chiadapter to convert the chi router to a lambda handler
 		chiLambda := chiadapter.New(versionedRouter)
 		lambda.Start(chiLambda.Proxy)
