@@ -1,4 +1,4 @@
-service: carex-zoom-auth
+service: tamra
 
 frameworkVersion: "3"
 
