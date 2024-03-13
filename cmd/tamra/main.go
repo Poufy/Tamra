@@ -39,10 +39,13 @@ import (
 //	@consumes					json
 func main() {
 	// Load the environment variables from the .env file
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file")
+	if os.Getenv("AWS_LAMBDA") != "TRUE" {
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Println("Error loading .env file")
+		}
 	}
+
 	// Read the configuration
 	config := utils.GetConfig()
 
