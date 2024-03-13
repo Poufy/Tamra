@@ -12,8 +12,11 @@ phases:
     commands:
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
       - zip -j bin/tamra.zip bin/bootstrap
+      - ls -al bin
   build:
     commands:
+      - ls -al
+      - ls -al bin
       - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION}
       
 artifacts:
