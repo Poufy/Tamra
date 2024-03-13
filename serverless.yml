@@ -5,6 +5,7 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: provided.al2
+  architecture: arm64
   region: eu-central-1
   stage: ${opt:stage, 'dev'}
   stackName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
