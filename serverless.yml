@@ -36,58 +36,62 @@ functions:
 
     events:
       - http:
-          path: /users
+          path: /api/v1/users
           method: post
           cors: true
       - http:
-          path: /users
+          path: /api/v1/users
           method: get
           cors: true
       - http:
-          path: /users/me
+          path: /api/v1/users/me
           method: get
           cors: true
       - http:
-          path: /users/me
+          path: /api/v1/users/me
           method: patch
           cors: true
       - http:
-          path: /restaurants
+          path: /api/v1/restaurants
           method: post
           cors: true
       - http:
-          path: /restaurants/me
+          path: /api/v1/restaurants/me
           method: get
           cors: true
       - http:
-          path: /restaurants/me
+          path: /api/v1/restaurants/me
           method: patch
           cors: true
       - http:
-          path: /restaurants/logo/uploadurl
+          path: /api/v1/restaurants/logo/uploadurl
           method: get
           cors: true
       - http:
-          path: /orders
+          path: /api/v1/orders
           method: post
           cors: true
       - http:
-          path: /orders/restaurant
+          path: /api/v1/orders/restaurant
           method: get
           cors: true
       - http:
-          path: /orders/user
+          path: /api/v1/orders/user
           method: get
           cors: true
       - http:
-          path: /orders/{id}/accept
+          path: /api/v1/orders/{id}/accept
           method: patch
           cors: true
       - http:
-          path: /orders/{id}/reject
+          path: /api/v1/orders/{id}/reject
           method: patch
           cors: true
       - http:
-          path: /orders/{id}/reassign
+          path: /api/v1/orders/{id}/reassign
           method: post
+          cors: true
+      - http:
+          path: /api/v1/docs/swagger/
+          method: get
           cors: true
