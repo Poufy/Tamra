@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	chiadapter "github.com/awslabs/aws-lambda-go-api-proxy/chi"
 	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
@@ -93,6 +94,12 @@ func main() {
 	logger.Info("Creating a new chi router")
 	// Create a new chi router
 	r := chi.NewRouter()
+
+	// Log all requests
+	r.Use(chimiddleware.RealIP)
+	r.Use(chimiddleware.Logger)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(chimiddleware.RequestID)
 
 	r.Mount("/users", userRouter.GetRouter())
 	r.Mount("/restaurants", restaurantRouter.GetRouter())
