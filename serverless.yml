@@ -26,9 +26,9 @@ package:
 
 functions:
   tamra:
-    handler: bootstrap
-    package:
-      artifact: bin/tamra.zip
+    handler: bin/bootstrap
+    # package:
+    #   artifact: bin/tamra.zip
     environment:
       DB_CONNECTION_STRING: ${ssm:/tamra/db_connection_string_${self:provider.stage}}
       FIREBASE_CONFIG_JSON: ${ssm:/tamra/firebase_config_json}
