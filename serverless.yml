@@ -8,11 +8,7 @@ provider:
   architecture: arm64
   region: eu-central-1
   stage: ${opt:stage, 'dev'}
-  stack:
-    name: ${self:custom.SERVICE_NAME}-${self:provider.stage}
-    tags:
-      Environment: ${self:provider.stage}
-      ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+  stackName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
   tags:
     Environment: ${self:provider.stage}
     ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
