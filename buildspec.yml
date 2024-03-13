@@ -4,19 +4,18 @@ run-as: root
 phases:
   install:
     commands:
-      # - yum install -y zip
+      - yum install -y zip
       - curl -sL https://rpm.nodesource.com/setup_18.x | bash -
       - yum install -y nodejs
       - npm install -g serverless
   pre_build:
     commands:
-      - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
-      # - zip -j bin/tamra.zip bin/bootstrap
+      - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/Main/bootstrap cmd/tamra/main.go
+      - zip -j bin/Main.zip bin/Main/bootstrap
       - ls -al bin
+      - ls -al
   build:
     commands:
-      - ls -al
-      - ls -al bin
       - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
       
 artifacts:

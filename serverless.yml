@@ -5,13 +5,12 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: provided.al2
-  architecture: arm64
   region: eu-central-1
   stage: ${opt:stage, 'dev'}
   stackName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
-  tags:
-    Environment: ${self:provider.stage}
-    ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+  stackTags:
+      Environment: ${self:provider.stage}
+      ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
 
 custom:
   SERVICE_NAME: tamra
@@ -20,15 +19,17 @@ custom:
     prod: info
 
 package:
-  patterns:
-    - "!./**"
+  individually: true
+  exclude:
+    - ./**
+  include:
     - ./bin/**
 
 functions:
   tamra:
-    handler: bin/bootstrap
-    # package:
-    #   artifact: bin/tamra.zip
+    handler: bootstrap
+    package:
+      artifact: bin/Main.zip
     environment:
       DB_CONNECTION_STRING: ${ssm:/tamra/db_connection_string_${self:provider.stage}}
       FIREBASE_CONFIG_JSON: ${ssm:/tamra/firebase_config_json}
