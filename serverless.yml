@@ -30,7 +30,7 @@ functions:
   tamra:
     handler: bootstrap
     package:
-      artifact: bin/Main.zip
+      artifact: bin/bootstrap.zip
     environment:
       DB_CONNECTION_STRING: ${ssm:/tamra/db_connection_string_${self:provider.stage}}
       FIREBASE_CONFIG_JSON: ${ssm:/tamra/firebase_config_json}
