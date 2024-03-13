@@ -105,8 +105,7 @@ func main() {
 	// if we were to use the same router r like r.Mount("/api/v1", r), routers like "/users" would still be accessible
 	versionedRouter := chi.NewRouter()
 
-	route := fmt.Sprintf("/%s/api/v1", config.Stage)
-	versionedRouter.Mount(route, r)
+	versionedRouter.Mount("/api/v1", r)
 
 	if os.Getenv("AWS_LAMBDA") == "TRUE" {
 		// If we are running on AWS Lambda, we use the chiadapter to convert the chi router to a lambda handler
