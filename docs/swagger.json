@@ -1,6 +1,5 @@
 {
     "schemes": [
-        "http",
         "https"
     ],
     "swagger": "2.0",
@@ -10,7 +9,7 @@
         "contact": {},
         "version": "1"
     },
-    "host": "localhost:8080",
+    "host": "tamra.gulbababaklava.com",
     "basePath": "/api/v1",
     "paths": {
         "/orders": {

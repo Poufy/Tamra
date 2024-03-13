@@ -11,9 +11,10 @@ phases:
   pre_build:
     commands:
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
+      # TODO: run swagger to generate the docs
       - echo "Zipping the binary file into the root directory of the zip" 
       # The -j flag will store just the file, not the full path. The bootstrap file must be in the root directory of the zip.
-      - zip -r bin/bootstrap.zip bin/bootstrap
+      - zip -j bin/bootstrap.zip bin/bootstrap
       - echo "Zipping the docs directory into the docs directory of the zip"
       - zip -ur bin/bootstrap.zip docs/
       - ls -al bin

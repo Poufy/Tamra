@@ -153,7 +153,7 @@ definitions:
       radius:
         type: integer
     type: object
-host: localhost:8080
+host: tamra.gulbababaklava.com
 info:
   contact: {}
   description: This is the API for the Tamra application
@@ -555,7 +555,6 @@ paths:
       tags:
       - users
 schemes:
-- http
 - https
 securityDefinitions:
   jwt:
