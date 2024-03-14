@@ -15,6 +15,8 @@ phases:
       - echo "Zipping the binary file into the root directory of the zip" 
       # The -j flag will store just the file, not the full path. The bootstrap file must be in the root directory of the zip.
       - zip -j bin/bootstrap.zip bin/bootstrap
+      - echo "Generating swagger docs"
+      - swag init -d ./cmd/tamra,./internal/app/tamra/handlers -g main.go --parseInternal --parseDependency -o docs
       - echo "Zipping the docs directory into the docs directory of the zip"
       - zip -ur bin/bootstrap.zip docs/
       - ls -al bin
