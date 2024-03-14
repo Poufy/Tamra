@@ -71,7 +71,7 @@ func RestaurantAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogg
 			// print the email
 			logger.Info("Email: %v", tokenWithClaims.Claims["email"])
 
-			ctx := context.WithValue(r.Context(), "UID", "restaurant")
+			ctx := context.WithValue(r.Context(), "UID", tokenWithClaims.UID)
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))
