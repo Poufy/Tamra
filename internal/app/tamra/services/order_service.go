@@ -30,14 +30,15 @@ type OrderService interface {
 }
 
 type OrderServiceImpl struct {
-	orderRepository repositories.OrderRepository
-	userRepository  repositories.UserRepository
-	logger          logrus.FieldLogger
+	orderRepository     repositories.OrderRepository
+	userRepository      repositories.UserRepository
+	notificationService NotificationService
+	logger              logrus.FieldLogger
 }
 
 // We return an implementation of the OrderService interface. This is so that we can easily swap out the implementation or mock it in tests.
-func NewOrderService(orderRepository repositories.OrderRepository, userRepository repositories.UserRepository, logger logrus.FieldLogger) OrderService {
-	return &OrderServiceImpl{orderRepository: orderRepository, userRepository: userRepository, logger: logger}
+func NewOrderService(orderRepository repositories.OrderRepository, userRepository repositories.UserRepository, notificationService NotificationService, logger logrus.FieldLogger) OrderService {
+	return &OrderServiceImpl{orderRepository: orderRepository, userRepository: userRepository, notificationService: notificationService, logger: logger}
 }
 
 // We first generate a 6 digit random number as the code for the order
@@ -67,7 +68,7 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 
 	// Notify the user that a new order has been created.
 	// Ideally this would be done in a seperate service that handles notifications
-	err = NotifyUser(user.FCMToken, order)
+	err = s.notificationService.NotifyUser(user.FCMToken, order)
 	s.logger.Info("User notified")
 	if err != nil {
 

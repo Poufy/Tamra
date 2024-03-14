@@ -62,9 +62,19 @@ func main() {
 	logger := utils.NewLogger(config.LogLevel)
 
 	logger.Info("Configuration values before initializing firebase auth", config.FirebaseConfigJSON)
-	firebaseAuth, err := firebase.NewFirebaseAuth(config.FirebaseConfigJSON)
+	firebaseApp := firebase.NewFirebaseApp(config.FirebaseConfigJSON)
 	if err != nil {
 		logrus.Panic("Failed to initialize firebase auth: ", err)
+	}
+
+	firebaseAuthClient, err := firebaseApp.FetchFirebaseAuthClient()
+	if err != nil {
+		logrus.Panic("Failed to initialize firebase auth: ", err)
+	}
+
+	firebaseMessagingClient, err := firebaseApp.FetchFirebaseMessagingClient()
+	if err != nil {
+		logrus.Panic("Failed to initialize firebase messaging client: ", err)
 	}
 
 	// Get the validator
@@ -74,16 +84,17 @@ func main() {
 	restaurantRepository := repositories.NewRestaurantRepository(db)
 	orderRepository := repositories.NewOrderRepository(db)
 
+	notificationService := services.NewNotificationService(logger, firebaseMessagingClient)
 	userService := services.NewUserService(userRepository, logger)
 	restaurantService := services.NewRestaurantService(restaurantRepository, logger)
-	orderService := services.NewOrderService(orderRepository, userRepository, logger)
+	orderService := services.NewOrderService(orderRepository, userRepository, notificationService, logger)
 
 	userHandler := handlers.NewUserHandler(userService, validator, logger)
 	restaurantHandler := handlers.NewRestaurantHandler(restaurantService, validator, logger, config)
 	orderHandler := handlers.NewOrderHandler(orderService, validator, logger)
 
-	userAuthMiddleware := middleware.UserAuthMiddleware(firebaseAuth, logger)
-	restaurantAuthMiddleware := middleware.RestaurantAuthMiddleware(firebaseAuth, logger)
+	userAuthMiddleware := middleware.UserAuthMiddleware(firebaseAuthClient, logger)
+	restaurantAuthMiddleware := middleware.RestaurantAuthMiddleware(firebaseAuthClient, logger)
 
 	logger.Info("Starting the server")
 	userRouter := routes.NewUserRouter(userHandler, userAuthMiddleware, logger)

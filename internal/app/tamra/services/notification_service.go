@@ -2,13 +2,38 @@ package services
 
 import (
 	"Tamra/internal/pkg/models"
+	"context"
+	"fmt"
 
+	"firebase.google.com/go/messaging"
 	"github.com/sirupsen/logrus"
 )
 
-func NotifyUser(fcmToken string, order *models.Order) error {
-	// Here we would send a notification to the user using the fcmToken
-	logrus.Info("Sending notification to user: ", fcmToken)
-	logrus.Info("Order: ", order)
+type NotificationService interface {
+	NotifyUser(fcmToken string, order *models.Order) error
+}
+
+type NotificationServiceImpl struct {
+	logger          logrus.FieldLogger
+	messagingClient *messaging.Client
+}
+
+func NewNotificationService(logger logrus.FieldLogger, messagingClient *messaging.Client) NotificationService {
+	return &NotificationServiceImpl{logger: logger, messagingClient: messagingClient}
+}
+
+func (ns NotificationServiceImpl) NotifyUser(fcmToken string, order *models.Order) error {
+	message := &messaging.Message{
+		Notification: &messaging.Notification{
+			Title: "New Order Received",
+			Body:  "You have a new order",
+		},
+		Token: fcmToken,
+	}
+
+	_, err := ns.messagingClient.Send(context.Background(), message)
+	if err != nil {
+		return fmt.Errorf("failed to send message: %w", err)
+	}
 	return nil
 }

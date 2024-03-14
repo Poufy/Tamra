@@ -6,22 +6,35 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"firebase.google.com/go/messaging"
 	"google.golang.org/api/option"
 )
 
-func NewFirebaseAuth(configJSON string) (*auth.Client, error) {
-	// Load the Firebase configuration from the file
-	opt := option.WithCredentialsJSON([]byte(configJSON))
+type FirebaseApp struct {
+	App *firebase.App
+}
 
-	// NewApp will first look for the FIREBASE_CONFIG environment variable.
+func NewFirebaseApp(configJSON string) *FirebaseApp {
+	opt := option.WithCredentialsJSON([]byte(configJSON))
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create a new firebase app: %w", err)
+		return nil
 	}
+	return &FirebaseApp{App: app}
+}
 
-	authClient, err := app.Auth(context.Background())
+func (fb FirebaseApp) FetchFirebaseAuthClient() (*auth.Client, error) {
+	authClient, err := fb.App.Auth(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new firebase auth client: %w", err)
 	}
 	return authClient, nil
+}
+
+func (fb FirebaseApp) FetchFirebaseMessagingClient() (*messaging.Client, error) {
+	messagingClient, err := fb.App.Messaging(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new firebase messaging client: %w", err)
+	}
+	return messagingClient, nil
 }
