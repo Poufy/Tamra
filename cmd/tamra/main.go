@@ -100,6 +100,7 @@ func main() {
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.RequestID)
+	r.Use(middleware.RequestIDMiddleware)
 
 	r.Mount("/users", userRouter.GetRouter())
 	r.Mount("/restaurants", restaurantRouter.GetRouter())

@@ -468,44 +468,6 @@ const docTemplate = `{
             }
         },
         "/users": {
-            "get": {
-                "security": [
-                    {
-                        "jwt": []
-                    }
-                ],
-                "description": "Get all users",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.UserResponse"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "users not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "failed to get users",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -662,6 +624,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "latitude",
+                "location_description",
                 "logo_url",
                 "longitude",
                 "name"
@@ -670,6 +633,9 @@ const docTemplate = `{
                 "latitude": {
                     "type": "number"
                 },
+                "location_description": {
+                    "type": "string"
+                },
                 "logo_url": {
                     "type": "string"
                 },
@@ -677,6 +643,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 }
             }
@@ -747,6 +716,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "latitude",
+                "location_description",
                 "logo_url",
                 "longitude",
                 "name"
@@ -761,6 +731,9 @@ const docTemplate = `{
                 "latitude": {
                     "type": "number"
                 },
+                "location_description": {
+                    "type": "string"
+                },
                 "logo_url": {
                     "type": "string"
                 },
@@ -768,6 +741,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -793,6 +769,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "latitude",
+                "location_description",
                 "logo_url",
                 "longitude",
                 "name"
@@ -801,6 +778,9 @@ const docTemplate = `{
                 "latitude": {
                     "type": "number"
                 },
+                "location_description": {
+                    "type": "string"
+                },
                 "logo_url": {
                     "type": "string"
                 },
@@ -808,6 +788,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 }
             }

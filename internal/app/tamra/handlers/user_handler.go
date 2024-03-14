@@ -9,8 +9,15 @@ import (
 	"fmt"
 	"net/http"
 
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 )
+
+// Key to use when setting the request ID.
+type ctxKeyRequestID int
+
+// RequestIDKey is the key that holds the unique request ID in a request context.
+const RequestIDKey ctxKeyRequestID = 0
 
 // ? Is this okay? Define an interface for the validator so we can pass the validator as a parameter
 // ? to the handler without having to import the validator package.
@@ -42,6 +49,7 @@ func NewUserHandler(userService services.UserService, validator Validator, logge
 //	@Failure		500	{string}	string				"Failed to create user"
 //	@Router			/users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to create user.", r.Context().Value(chimiddleware.RequestIDKey))
 	createUserRequest := &models.CreateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(createUserRequest)
 	if err != nil {
@@ -87,6 +95,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(userResponse)
+	h.logger.Infof("Request ID %s: Finished processing request to create user.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // GetUser godoc
@@ -101,6 +110,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string	"failed to get user"
 //	@Router			/users/me [get]
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to get user.", r.Context().Value(chimiddleware.RequestIDKey))
 	userID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Error("failed to get user ID from request context")
@@ -129,6 +139,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	userResponse := utils.MapUserToUserResponse(user)
 
 	json.NewEncoder(w).Encode(userResponse)
+	h.logger.Infof("Request ID %s: Finished processing request to get user.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // UpdateUser godoc
@@ -145,6 +156,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string				"Failed to update user"
 //	@Router			/users/me [patch]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to update user.", r.Context().Value(chimiddleware.RequestIDKey))
 	updateUserRequest := &models.UpdateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateUserRequest)
 	if err != nil {
@@ -189,20 +201,11 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userResponse := utils.MapUserToUserResponse(updatedUser)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userResponse)
+	h.logger.Infof("Request ID %s: Finished processing request to update user.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
-// GetUsers godoc
-//
-//	@Summary		Get all users
-//	@Description	Get all users
-//	@Tags			users
-//	@Produce		json
-//	@Security		jwt
-//	@Success		200	{array}		models.UserResponse
-//	@Failure		404	{string}	string	"users not found"
-//	@Failure		500	{string}	string	"failed to get users"
-//	@Router			/users [get]
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to get users.", r.Context().Value(chimiddleware.RequestIDKey))
 	users, err := h.userService.GetUsers()
 	if err != nil {
 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
@@ -223,6 +226,7 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	userResponses := utils.MapUsersToUserResponses(users)
 
 	json.NewEncoder(w).Encode(userResponses)
+	h.logger.Infof("Request ID %s: Finished processing request to get users.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {

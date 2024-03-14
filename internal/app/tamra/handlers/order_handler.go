@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,6 +39,7 @@ func NewOrderHandler(orderService services.OrderService, validator Validator, lo
 //	@Failure		500	{string}	string			"Failed to create order"
 //	@Router			/orders [post]
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to create order.", r.Context().Value(chimiddleware.RequestIDKey))
 	createOrderRequest := &models.CreateOrderRequest{}
 	err := json.NewDecoder(r.Body).Decode(createOrderRequest)
 	if err != nil {
@@ -74,6 +76,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(createdOrder)
+	h.logger.Infof("Request ID %s: Finished processing request to create order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // GetUserOrders
@@ -89,7 +92,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string			"failed to get orders"
 //	@Router			/orders/user [get]
 func (h *OrderHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
-	// Here we would get the user ID from the request context
+	h.logger.Infof("Request ID %s: Received request to get user orders.", r.Context().Value(chimiddleware.RequestIDKey))
 	fbUserID := r.Context().Value("UID").(string)
 
 	orders, err := h.orderService.GetUserOrders(fbUserID)
@@ -108,6 +111,7 @@ func (h *OrderHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(orders)
+	h.logger.Infof("Request ID %s: Finished processing request to get user orders.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // GetRestaurantOrders
@@ -123,7 +127,7 @@ func (h *OrderHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string			"failed to get orders"
 //	@Router			/orders/restaurant [get]
 func (h *OrderHandler) GetRestaurantOrders(w http.ResponseWriter, r *http.Request) {
-	// Here we would get the user ID from the request context
+	h.logger.Infof("Request ID %s: Received request to get restaurant orders.", r.Context().Value(chimiddleware.RequestIDKey))
 	fbUserID := r.Context().Value("UID").(string)
 
 	orders, err := h.orderService.GetRestaurantOrders(fbUserID)
@@ -142,9 +146,11 @@ func (h *OrderHandler) GetRestaurantOrders(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(orders)
+	h.logger.Infof("Request ID %s: Finished processing request to get restaurant orders.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to update order.", r.Context().Value(chimiddleware.RequestIDKey))
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		h.logger.WithError(err).Error("failed to parse id")
@@ -186,9 +192,11 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updatedOrder)
+	h.logger.Infof("Request ID %s: Finished processing request to update order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to delete order.", r.Context().Value(chimiddleware.RequestIDKey))
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		h.logger.WithError(err).Error("failed to parse id")
@@ -206,6 +214,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+	h.logger.Infof("Request ID %s: Finished processing request to delete order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // AcceptOrder godoc
@@ -222,6 +231,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string	"failed to accept order"
 //	@Router			/orders/{id}/accept [patch]
 func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to accept order.", r.Context().Value(chimiddleware.RequestIDKey))
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -244,6 +254,7 @@ func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "OK")
+	h.logger.Infof("Request ID %s: Finished processing request to accept order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // RejectOrder godoc
@@ -260,6 +271,7 @@ func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string	"failed to reject order"
 //	@Router			/orders/{id}/reject [patch]
 func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to reject order.", r.Context().Value(chimiddleware.RequestIDKey))
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -282,6 +294,7 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "OK")
+	h.logger.Infof("Request ID %s: Finished processing request to reject order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // ReassignOrder godoc
@@ -298,6 +311,7 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{string}	string	"failed to reassign order"
 //	@Router			/orders/{id}/reassign [post]
 func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to reassign order.", r.Context().Value(chimiddleware.RequestIDKey))
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -320,4 +334,5 @@ func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "OK")
+	h.logger.Infof("Request ID %s: Finished processing request to reassign order.", r.Context().Value(chimiddleware.RequestIDKey))
 }

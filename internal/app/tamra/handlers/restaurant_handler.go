@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,6 +38,7 @@ func NewRestaurantHandler(restaurantService services.RestaurantService, validato
 //	@Failure		500	{string}	string				"Failed to create restaurant"
 //	@Router			/restaurants [post]
 func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to create restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 	createRestaurantRequest := &models.CreateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(createRestaurantRequest)
 	if err != nil {
@@ -80,6 +82,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(createdRestaurant)
+	h.logger.Infof("Request ID %s: Finished processing request to create restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // GetRestaurant godoc
@@ -94,6 +97,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 //	@Failure		500	{string}	string				"Failed to get restaurant"
 //	@Router			/restaurants/me [get]
 func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to get restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 	// Extract the user ID from the request context
 	fbUID := r.Context().Value("UID").(string)
 
@@ -120,6 +124,7 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(restaurant)
+	h.logger.Infof("Request ID %s: Finished processing request to get restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // UpdateRestaurant godoc
@@ -136,8 +141,7 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 //	@Failure		500	{string}	string				"Failed to update restaurant"
 //	@Router			/restaurants/me [patch]
 func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
-	// Extract the user ID from the request context
-	h.logger.Infof("Context: %+v", r.Context())
+	h.logger.Infof("Request ID %s: Received request to update restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 
 	updateRestaurantRequest := &models.UpdateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateRestaurantRequest)
@@ -180,6 +184,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updatedRestaurant)
+	h.logger.Infof("Request ID %s: Finished processing request to update restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // GetLogoUploadURL godoc
@@ -193,6 +198,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 //	@Failure		500	{string}	string								"Failed to get upload URL"
 //	@Router			/restaurants/logo/uploadurl [get]
 func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to get logo upload URL.", r.Context().Value(chimiddleware.RequestIDKey))
 	// Extract the user ID from the request context
 	UID := r.Context().Value("UID").(string)
 
@@ -220,4 +226,5 @@ func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(presignedURLResposne)
+	h.logger.Infof("Request ID %s: Finished processing request to get logo upload URL.", r.Context().Value(chimiddleware.RequestIDKey))
 }

@@ -24,14 +24,14 @@ func NewRestaurantRepository(db *sql.DB) RestaurantRepository {
 }
 
 func (r *RestaurantRepositoryImpl) CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
-	const query = "INSERT INTO restaurants (id, name, location, logo_url, created_at, updated_at) VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, logo_url, created_at, updated_at"
-	err := r.db.QueryRow(query, restaurant.ID, restaurant.Name, restaurant.Longitude, restaurant.Latitude, restaurant.LogoURL).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+	const query = "INSERT INTO restaurants (id, name, location, location_description, phone_number, logo_url, created_at, updated_at) VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6, $7, CLOCK_TIMESTAMP(), CLOCK_TIMESTAMP()) RETURNING id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url,  created_at, updated_at"
+	err := r.db.QueryRow(query, restaurant.ID, restaurant.Name, restaurant.Longitude, restaurant.Latitude, restaurant.LocationDescription, restaurant.PhoneNumber, restaurant.LogoURL).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 	return restaurant, err
 }
 
 func (r *RestaurantRepositoryImpl) GetRestaurant(fbUID string) (*models.Restaurant, error) {
 	restaurant := &models.Restaurant{}
-	err := r.db.QueryRow("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, logo_url, created_at, updated_at FROM restaurants WHERE id = $1", fbUID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+	err := r.db.QueryRow("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url, created_at, updated_at FROM restaurants WHERE id = $1", fbUID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 	// Return a custom error if the restaurant is not found so that the service or handler can handle it.
 	// In this case we want to return a 404 status code
 	if err == sql.ErrNoRows {
@@ -42,13 +42,13 @@ func (r *RestaurantRepositoryImpl) GetRestaurant(fbUID string) (*models.Restaura
 }
 
 func (r *RestaurantRepositoryImpl) UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error) {
-	const query = "UPDATE restaurants SET name = $1, location = ST_SetSRID(ST_MakePoint($2, $3), 4326), logo_url = $4, updated_at = CLOCK_TIMESTAMP() WHERE id = $5 RETURNING id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, logo_url, created_at, updated_at"
-	err := r.db.QueryRow(query, restaurant.Name, restaurant.Longitude, restaurant.Latitude, restaurant.LogoURL, restaurant.ID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+	const query = "UPDATE restaurants SET name = $1, location = ST_SetSRID(ST_MakePoint($2, $3), 4326), location_description = $4, phone_number = $5, logo_url = $6, updated_at = CLOCK_TIMESTAMP() WHERE id = $7 RETURNING id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url, created_at, updated_at"
+	err := r.db.QueryRow(query, restaurant.Name, restaurant.Longitude, restaurant.Latitude, restaurant.LocationDescription, restaurant.PhoneNumber, restaurant.LogoURL, restaurant.ID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 	return restaurant, err
 }
 
 func (r *RestaurantRepositoryImpl) GetRestaurants() ([]*models.Restaurant, error) {
-	rows, err := r.db.Query("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, logo_url, created_at, updated_at FROM restaurants")
+	rows, err := r.db.Query("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url, created_at, updated_at FROM restaurants")
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (r *RestaurantRepositoryImpl) GetRestaurants() ([]*models.Restaurant, error
 	restaurants := []*models.Restaurant{}
 	for rows.Next() {
 		restaurant := &models.Restaurant{}
-		err := rows.Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+		err := rows.Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
