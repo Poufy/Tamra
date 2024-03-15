@@ -63,9 +63,6 @@ func main() {
 
 	logger.Info("Configuration values before initializing firebase auth", config.FirebaseConfigJSON)
 	firebaseApp := firebase.NewFirebaseApp(config.FirebaseConfigJSON)
-	if err != nil {
-		logrus.Panic("Failed to initialize firebase auth: ", err)
-	}
 
 	firebaseAuthClient, err := firebaseApp.FetchFirebaseAuthClient()
 	if err != nil {

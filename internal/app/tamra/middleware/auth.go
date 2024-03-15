@@ -23,7 +23,7 @@ func UserAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) fu
 
 			// Verify the token.
 			// TODO: what is the use of the context.Background()?
-			tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
+			tokenWithClaims, err := firebaseAuth.VerifyIDToken(r.Context(), token)
 			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
@@ -53,7 +53,8 @@ func RestaurantAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogg
 
 			// Verify the token.
 			// TODO: what is the use of the context.Background()?
-			tokenWithClaims, err := firebaseAuth.VerifyIDToken(context.Background(), token)
+			// TODO: should this context from the request or should we create it from the context.Background()?
+			tokenWithClaims, err := firebaseAuth.VerifyIDToken(r.Context(), token)
 			if err != nil {
 				logger.Error("Failed to verify token: %v", err)
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
