@@ -62,9 +62,9 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	order := utils.MapCreateOrderRequestToOrder(createOrderRequest)
 
-	firebaseUserID := r.Context().Value("UID").(string)
+	firebaseUID := r.Context().Value("UID").(string)
 
-	order.RestaurantID = firebaseUserID
+	order.RestaurantID = firebaseUID
 
 	createdOrder, err := h.orderService.CreateOrder(order)
 	if err != nil {
@@ -242,9 +242,9 @@ func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Here we would get the user ID from the request context
-	firebaseUserID := r.Context().Value("UID").(string)
+	firebaseUID := r.Context().Value("UID").(string)
 
-	err = h.orderService.AcceptOrder(id, firebaseUserID)
+	err = h.orderService.AcceptOrder(id, firebaseUID)
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to accept order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -282,9 +282,9 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Here we would get the user ID from the request context
-	firebaseUserID := r.Context().Value("UID").(string)
+	firebaseUID := r.Context().Value("UID").(string)
 
-	err = h.orderService.RejectOrder(id, firebaseUserID)
+	err = h.orderService.RejectOrder(id, firebaseUID)
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to reject order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -295,6 +295,53 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "OK")
 	h.logger.Infof("Request ID %s: Finished processing request to reject order.", r.Context().Value(chimiddleware.RequestIDKey))
+}
+
+// FulfillOrder godoc
+//
+//	@Summary		Fulfill a order
+//	@Description	Fulfill a order
+//	@Tags			orders
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Order ID"
+//	@Security		jwt
+//	@Success		200	{string}	string	"OK"
+//	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		500	{string}	string	"failed to fulfill order"
+//	@Router			/orders/{id}/fulfill [post]
+func (h *OrderHandler) FulfillOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to fulfill order.", r.Context().Value(chimiddleware.RequestIDKey))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid id")
+		return
+	}
+
+	// Here we would get the user ID from the request context
+	firebaseUID := r.Context().Value("UID").(string)
+
+	err = h.orderService.FulfillOrder(id, firebaseUID)
+	if err != nil {
+		if errors.Is(err, utils.ErrOrderNotAccepted) {
+			h.logger.WithError(err).Errorf("Request ID %s: Order not accepted", r.Context().Value(chimiddleware.RequestIDKey))
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "order not accepted")
+			return
+		}
+
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to fulfill order", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to fulfill order")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
+	h.logger.Infof("Request ID %s: Finished processing request to fulfill order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // ReassignOrder godoc
@@ -321,9 +368,9 @@ func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	firebaseUserID := r.Context().Value("UID").(string)
+	firebaseUID := r.Context().Value("UID").(string)
 
-	err = h.orderService.ReassignOrder(id, firebaseUserID)
+	err = h.orderService.ReassignOrder(id, firebaseUID)
 
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to reassign order", r.Context().Value(chimiddleware.RequestIDKey))

@@ -61,7 +61,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	// It should be loosely coupled and only know about the domain models
 	restaurant := utils.MapCreateRestaurantRequestToRestaurant(createRestaurantRequest)
 	// Extract the user ID from the request context
-	firebaseUserID, ok := r.Context().Value("UID").(string)
+	firebaseUID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +69,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurant.ID = firebaseUserID
+	restaurant.ID = firebaseUID
 
 	createdRestaurant, err := h.restaurantService.CreateRestaurant(restaurant)
 	if err != nil {
@@ -161,7 +161,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	restaurant := utils.MapUpdateRestaurantRequestToRestaurant(updateRestaurantRequest)
 
-	firebaseUserID, ok := r.Context().Value("UserID").(string)
+	firebaseUID, ok := r.Context().Value("UserID").(string)
 
 	if !ok {
 		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
@@ -170,7 +170,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurant.ID = firebaseUserID
+	restaurant.ID = firebaseUID
 
 	updatedRestaurant, err := h.restaurantService.UpdateRestaurant(restaurant)
 	if err != nil {

@@ -2,7 +2,9 @@ package repositories
 
 import (
 	"Tamra/internal/pkg/models"
+	"Tamra/internal/pkg/utils"
 	"database/sql"
+	"fmt"
 )
 
 type OrderRepository interface {
@@ -103,6 +105,29 @@ func (r *OrderRepositoryImpl) UpdateUserOrderState(id int, fbUID string, state s
 func (r *OrderRepositoryImpl) UpdateRestaurantOrderState(id int, fbUID string, state string) error {
 	_, err := r.db.Exec("UPDATE orders SET state = $1 WHERE id = $2 AND restaurant_id = $3", state, id, fbUID)
 	return err
+}
+
+// Fulfill the order if the order is accepted
+func (r *OrderRepositoryImpl) FulfillOrder(id int, fbUID string) error {
+	var currentState string
+	err := r.db.QueryRow("SELECT state FROM orders WHERE id = $1 AND restaurant_id = $2", id, fbUID).Scan(&currentState)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("no order found with the given id and restaurant_id")
+		}
+		return err
+	}
+
+	if currentState != "ACCEPTED" {
+		return utils.ErrOrderNotAccepted
+	}
+
+	_, err = r.db.Exec("UPDATE orders SET state = 'FULFILLED' WHERE id = $1 AND restaurant_id = $2", id, fbUID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUID string) (bool, error) {

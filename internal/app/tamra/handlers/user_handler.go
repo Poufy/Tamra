@@ -72,7 +72,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// It should be loosely coupled and only know about the domain models
 	user := utils.MapCreateUserRequestToUser(createUserRequest)
 
-	firebaseUserID, ok := r.Context().Value("UID").(string)
+	firebaseUID, ok := r.Context().Value("UID").(string)
 	if !ok {
 		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -80,7 +80,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.ID = firebaseUserID
+	user.ID = firebaseUID
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to create user", r.Context().Value(chimiddleware.RequestIDKey))

@@ -11,21 +11,16 @@ import (
 )
 
 type OrderService interface {
-	// CreateOrder creates a new order
 	CreateOrder(order *models.Order) (*models.Order, error)
-	// GetUserOrders returns a list of orders
+	// GetUserOrders returns a list of orders for a user
 	GetUserOrders(userID string) ([]*models.Order, error)
-	// GetRestaurantOrders returns a list of orders
+	// GetRestaurantOrders returns a list of orders for a restaurant
 	GetRestaurantOrders(restaurantID string) ([]*models.Order, error)
-	// UpdateOrder updates an order
 	UpdateOrder(order *models.Order) (*models.Order, error)
-	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
-	// AcceptOrder accepts an order
 	AcceptOrder(id int, fbUID string) error
-	// RejectOrder rejects an order
+	FulfillOrder(id int, fbUID string) error
 	RejectOrder(id int, fbUID string) error
-	// ReassignOrder reassigns an order
 	ReassignOrder(id int, fbUID string) error
 }
 
@@ -136,6 +131,16 @@ func (s *OrderServiceImpl) AcceptOrder(id int, fbUID string) error {
 	if err != nil {
 
 		return fmt.Errorf("failed to accept order: %w", err)
+	}
+
+	return nil
+}
+
+func (s *OrderServiceImpl) FulfillOrder(id int, fbUID string) error {
+	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "FULFILLED")
+	if err != nil {
+
+		return fmt.Errorf("failed to fulfill order: %w", err)
 	}
 
 	return nil
