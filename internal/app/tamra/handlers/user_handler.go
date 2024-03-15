@@ -53,7 +53,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	createUserRequest := &models.CreateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(createUserRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -61,7 +61,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = h.validator.Struct(createUserRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -74,7 +74,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	firebaseUserID, ok := r.Context().Value("UID").(string)
 	if !ok {
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -83,7 +83,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	user.ID = firebaseUserID
 	createdUser, err := h.userService.CreateUser(user)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to create user")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to create user", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to create user")
 		return
@@ -113,7 +113,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to get user.", r.Context().Value(chimiddleware.RequestIDKey))
 	userID, ok := r.Context().Value("UID").(string)
 	if !ok {
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -123,13 +123,13 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
 		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("user not found")
+			h.logger.WithError(err).Errorf("Request ID %s: User not found", r.Context().Value(chimiddleware.RequestIDKey))
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, "user not found")
 			return
 		}
 
-		h.logger.WithError(err).Error("failed to get user")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get user", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user")
 		return
@@ -160,7 +160,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	updateUserRequest := &models.UpdateUserRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateUserRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -168,7 +168,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = h.validator.Struct(updateUserRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -179,7 +179,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	fbUID, ok := r.Context().Value("UID").(string)
 
 	if !ok {
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -190,7 +190,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	updatedUser, err := h.userService.UpdateUser(user)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to update user")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to update user", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to update user")
 		return
@@ -210,13 +210,13 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// We use errors.Is instead of checking with == because the error might be wrapped and we want to check the underlying error type.
 		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("users not found")
+			h.logger.WithError(err).Errorf("Request ID %s: Users not found", r.Context().Value(chimiddleware.RequestIDKey))
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, "users not found")
 			return
 		}
 
-		h.logger.WithError(err).Error("failed to get users")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get users", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get users")
 	}

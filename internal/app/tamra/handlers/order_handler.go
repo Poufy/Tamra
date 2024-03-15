@@ -43,7 +43,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	createOrderRequest := &models.CreateOrderRequest{}
 	err := json.NewDecoder(r.Body).Decode(createOrderRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -51,7 +51,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.validator.Struct(createOrderRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -68,7 +68,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	createdOrder, err := h.orderService.CreateOrder(order)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to create order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to create order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to create order")
 		return
@@ -98,12 +98,12 @@ func (h *OrderHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 	orders, err := h.orderService.GetUserOrders(fbUserID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("order not found")
+			h.logger.WithError(err).Errorf("Request ID %s: Order not found", r.Context().Value(chimiddleware.RequestIDKey))
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, "order not found")
 			return
 		}
-		h.logger.WithError(err).Error("failed to get orders")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get orders", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get orders")
 		return
@@ -133,12 +133,12 @@ func (h *OrderHandler) GetRestaurantOrders(w http.ResponseWriter, r *http.Reques
 	orders, err := h.orderService.GetRestaurantOrders(fbUserID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("order not found")
+			h.logger.WithError(err).Errorf("Request ID %s: Order not found", r.Context().Value(chimiddleware.RequestIDKey))
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, "order not found")
 			return
 		}
-		h.logger.WithError(err).Error("failed to get orders")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get orders", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get orders")
 		return
@@ -153,7 +153,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to update order.", r.Context().Value(chimiddleware.RequestIDKey))
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid id")
 		return
@@ -162,7 +162,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	updateOrderRequest := &models.UpdateOrderRequest{}
 	err = json.NewDecoder(r.Body).Decode(updateOrderRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -170,7 +170,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.validator.Struct(updateOrderRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -184,7 +184,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 
 	updatedOrder, err := h.orderService.UpdateOrder(order)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to update order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to update order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to update order")
 		return
@@ -199,7 +199,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to delete order.", r.Context().Value(chimiddleware.RequestIDKey))
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid id")
 		return
@@ -207,7 +207,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.orderService.DeleteOrder(id)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to delete order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to delete order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to delete order")
 		return
@@ -235,7 +235,7 @@ func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid id")
 		return
@@ -246,7 +246,7 @@ func (h *OrderHandler) AcceptOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.orderService.AcceptOrder(id, firebaseUserID)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to accept order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to accept order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to accept order")
 		return
@@ -275,7 +275,7 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid id")
 		return
@@ -286,7 +286,7 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.orderService.RejectOrder(id, firebaseUserID)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to reject order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to reject order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to reject order")
 		return
@@ -315,7 +315,7 @@ func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.logger.WithError(err).Error("failed to parse id")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid id")
 		return
@@ -326,7 +326,7 @@ func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 	err = h.orderService.ReassignOrder(id, firebaseUserID)
 
 	if err != nil {
-		h.logger.WithError(err).Error("failed to reassign order")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to reassign order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to reassign order")
 		return

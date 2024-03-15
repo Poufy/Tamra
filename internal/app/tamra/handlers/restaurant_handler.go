@@ -42,7 +42,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	createRestaurantRequest := &models.CreateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(createRestaurantRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -50,7 +50,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	err = h.validator.Struct(createRestaurantRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -63,8 +63,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 	// Extract the user ID from the request context
 	firebaseUserID, ok := r.Context().Value("UID").(string)
 	if !ok {
-		h.logger.Error("Context", r.Context())
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -74,7 +73,7 @@ func (h *RestaurantHandler) CreateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	createdRestaurant, err := h.restaurantService.CreateRestaurant(restaurant)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to create restaurant")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to create restaurant", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to create restaurant")
 		return
@@ -102,7 +101,7 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 	fbUID := r.Context().Value("UID").(string)
 
 	if fbUID == "" {
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -111,12 +110,12 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 	restaurant, err := h.restaurantService.GetRestaurant(fbUID)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			h.logger.WithError(err).Error("restaurant not found")
+			h.logger.WithError(err).Errorf("Request ID %s: Restaurant not found", r.Context().Value(chimiddleware.RequestIDKey))
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, "restaurant not found")
 			return
 		}
-		h.logger.WithError(err).Error("failed to get restaurant")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get restaurant", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get restaurant")
 		return
@@ -146,7 +145,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	updateRestaurantRequest := &models.UpdateRestaurantRequest{}
 	err := json.NewDecoder(r.Body).Decode(updateRestaurantRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to decode request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to decode request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -154,7 +153,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	err = h.validator.Struct(updateRestaurantRequest)
 	if err != nil {
-		h.logger.WithError(err).Error("invalid request body")
+		h.logger.WithError(err).Errorf("Request ID %s: Invalid request body", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "invalid request body")
 		return
@@ -165,8 +164,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 	firebaseUserID, ok := r.Context().Value("UserID").(string)
 
 	if !ok {
-		h.logger.Error("Context", r.Context())
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -176,7 +174,7 @@ func (h *RestaurantHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Requ
 
 	updatedRestaurant, err := h.restaurantService.UpdateRestaurant(restaurant)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to update restaurant")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to update restaurant", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to update restaurant")
 		return
@@ -203,7 +201,7 @@ func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Requ
 	UID := r.Context().Value("UID").(string)
 
 	if UID == "" {
-		h.logger.Error("failed to get user ID from request context")
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get user ID from request context")
 		return
@@ -211,7 +209,7 @@ func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Requ
 
 	presignedURL, storedFileURL, err := h.restaurantService.GetLogoUploadURL(UID, h.config.RestaurantLogosBucket)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to get upload URL")
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get upload URL", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to get upload URL")
 		return
