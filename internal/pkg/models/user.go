@@ -20,6 +20,7 @@ type User struct {
 type CreateUserRequest struct {
 	Longitude float64 `json:"longitude" validate:"required"`
 	Latitude  float64 `json:"latitude" validate:"required"`
+	IsActive  bool    `json:"is_active" validate:"required"`
 	Phone     string  `json:"phone" validate:"required,e164"`
 	Radius    int     `json:"radius" validate:"required"`
 	FCMToken  string  `json:"fcm_token" validate:"required"`
