@@ -1,5 +1,6 @@
 {
     "schemes": [
+        "http",
         "https"
     ],
     "swagger": "2.0",
@@ -9,7 +10,7 @@
         "contact": {},
         "version": "1"
     },
-    "host": "tamra.gulbababaklava.com",
+    "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
         "/orders": {
@@ -191,6 +192,55 @@
                     },
                     "500": {
                         "description": "failed to accept order",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}/fulfill": {
+            "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Fulfill a order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Fulfill a order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid order ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to fulfill order",
                         "schema": {
                             "type": "string"
                         }
@@ -651,6 +701,7 @@
             "type": "object",
             "required": [
                 "fcm_token",
+                "is_active",
                 "latitude",
                 "longitude",
                 "phone",
@@ -659,6 +710,9 @@
             "properties": {
                 "fcm_token": {
                     "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
                 },
                 "latitude": {
                     "type": "number"
@@ -796,6 +850,7 @@
             "type": "object",
             "required": [
                 "fcm_token",
+                "is_active",
                 "latitude",
                 "longitude",
                 "phone",

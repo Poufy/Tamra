@@ -15,6 +15,7 @@ func MapCreateUserRequestToUser(req *models.CreateUserRequest) *models.User {
 		Phone:     req.Phone,
 		Radius:    req.Radius,
 		FCMToken:  req.FCMToken,
+		IsActive:  *req.IsActive,
 	}
 }
 

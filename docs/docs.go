@@ -201,6 +201,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/{id}/fulfill": {
+            "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Fulfill a order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Fulfill a order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid order ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to fulfill order",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{id}/reassign": {
             "post": {
                 "security": [
@@ -654,6 +703,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "fcm_token",
+                "is_active",
                 "latitude",
                 "longitude",
                 "phone",
@@ -662,6 +712,9 @@ const docTemplate = `{
             "properties": {
                 "fcm_token": {
                     "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
                 },
                 "latitude": {
                     "type": "number"
@@ -799,6 +852,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "fcm_token",
+                "is_active",
                 "latitude",
                 "longitude",
                 "phone",
@@ -865,9 +919,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1",
-	Host:             "tamra.gulbababaklava.com",
+	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
-	Schemes:          []string{"https"},
+	Schemes:          []string{"http", "https"},
 	Title:            "Tamra API",
 	Description:      "This is the API for the Tamra application",
 	InfoInstanceName: "swagger",

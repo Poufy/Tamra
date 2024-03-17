@@ -27,7 +27,7 @@ import (
 //	@description				This is the API for the Tamra application
 //	@host						tamra.gulbababaklava.com
 //	@BasePath					/api/v1
-//	@schemes					https
+//	@schemes					http https
 //
 // this is openapi2.0 so bearer token is not supported. so we use apikey and name it jwt
 //
