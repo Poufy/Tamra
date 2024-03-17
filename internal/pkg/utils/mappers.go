@@ -45,7 +45,7 @@ func MapUpdateUserRequestToUser(req *models.UpdateUserRequest) *models.User {
 	return &models.User{
 		Longitude: req.Longitude,
 		Latitude:  req.Latitude,
-		IsActive:  req.IsActive,
+		IsActive:  *req.IsActive,
 		Phone:     req.Phone,
 		Radius:    req.Radius,
 		FCMToken:  req.FCMToken,
