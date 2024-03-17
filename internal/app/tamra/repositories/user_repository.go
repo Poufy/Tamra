@@ -101,6 +101,7 @@ func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID string) (*models
 	FROM users u
 	JOIN restaurants r ON ST_DWithin(u.location, r.location, u.radius)
 	WHERE r.id = $1
+	AND u.is_active = true
 	ORDER BY u.last_order_received
 	LIMIT 1
 	`
