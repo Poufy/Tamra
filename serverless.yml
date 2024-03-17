@@ -12,12 +12,21 @@ provider:
   stackTags:
       Environment: ${self:provider.stage}
       ProductName: ${self:custom.SERVICE_NAME}-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::${self:custom.RESTAURANT_LOGOS_BUCKET.${self:provider.stage}}/*"
+
 
 custom:
   SERVICE_NAME: tamra
   LOG_LEVEL:
     dev: debug
     prod: info
+  RESTAURANT_LOGOS_BUCKET:
+    dev: dev-tamra-restaurant-logos
+    prod: prod-tamra-restaurant-logos
 
 package:
   individually: true
@@ -35,6 +44,7 @@ functions:
       DB_CONNECTION_STRING: ${ssm:/tamra/db_connection_string_${self:provider.stage}}
       FIREBASE_CONFIG_JSON: ${ssm:/tamra/firebase_config_json_2}
       LOG_LEVEL: ${self:custom.LOG_LEVEL.${self:provider.stage}}
+      RESTAURANT_LOGOS_BUCKET: ${self:custom.RESTAURANT_LOGOS_BUCKET.${self:provider.stage}
       STAGE: ${self:provider.stage}
 
     events:
