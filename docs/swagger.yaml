@@ -35,6 +35,8 @@ definitions:
       fcm_token:
         type: string
       is_active:
+        description: Pointer to a bool so the validation library doesn't complain
+          if the value is false
         type: boolean
       latitude:
         type: number
@@ -172,7 +174,7 @@ definitions:
       radius:
         type: integer
     type: object
-host: localhost:8080
+host: tamra.gulbababaklava.com
 info:
   contact: {}
   description: This is the API for the Tamra application

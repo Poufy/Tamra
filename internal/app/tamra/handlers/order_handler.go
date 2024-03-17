@@ -297,6 +297,39 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Finished processing request to reject order.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
+func (h *OrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to cancel order.", r.Context().Value(chimiddleware.RequestIDKey))
+	orderID, err := strconv.Atoi(chi.URLParam(r, "orderID"))
+	if err != nil {
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "invalid id")
+		return
+	}
+
+	// Here we would get the user ID from the request context
+	fbRetaurantUID := r.Context().Value("UID").(string)
+
+	err = h.orderService.CancelOrder(orderID, fbRetaurantUID)
+	if err != nil {
+		if errors.Is(err, utils.ErrOrderNotAccepted) {
+			h.logger.WithError(err).Errorf("Request ID %s: Order not accepted", r.Context().Value(chimiddleware.RequestIDKey))
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "order not accepted")
+			return
+		}
+
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to cancel order", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to cancel order")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
+	h.logger.Infof("Request ID %s: Finished processing request to cancel order.", r.Context().Value(chimiddleware.RequestIDKey))
+}
+
 // FulfillOrder godoc
 //
 //	@Summary		Fulfill a order
@@ -313,7 +346,7 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 //	@Router			/orders/{id}/fulfill [post]
 func (h *OrderHandler) FulfillOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to fulfill order.", r.Context().Value(chimiddleware.RequestIDKey))
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	orderID, err := strconv.Atoi(chi.URLParam(r, "orderID"))
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
@@ -324,7 +357,7 @@ func (h *OrderHandler) FulfillOrder(w http.ResponseWriter, r *http.Request) {
 	// Here we would get the user ID from the request context
 	firebaseUID := r.Context().Value("UID").(string)
 
-	err = h.orderService.FulfillOrder(id, firebaseUID)
+	err = h.orderService.FulfillOrder(orderID, firebaseUID)
 	if err != nil {
 		if errors.Is(err, utils.ErrOrderNotAccepted) {
 			h.logger.WithError(err).Errorf("Request ID %s: Order not accepted", r.Context().Value(chimiddleware.RequestIDKey))

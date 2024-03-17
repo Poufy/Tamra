@@ -95,7 +95,7 @@ func main() {
 
 	logger.Info("Starting the server")
 	userRouter := routes.NewUserRouter(userHandler, userAuthMiddleware, logger)
-	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, restaurantAuthMiddleware, logger)
+	restaurantRouter := routes.NewRestaurantRouter(restaurantHandler, restaurantAuthMiddleware, userAuthMiddleware, logger)
 	orderRouter := routes.NewOrderRouter(orderHandler, restaurantAuthMiddleware, userAuthMiddleware, logger)
 	docsRouter := routes.NewDocsRouter(logger)
 

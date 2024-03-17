@@ -10,7 +10,7 @@
         "contact": {},
         "version": "1"
     },
-    "host": "localhost:8080",
+    "host": "tamra.gulbababaklava.com",
     "basePath": "/api/v1",
     "paths": {
         "/orders": {
@@ -712,6 +712,7 @@
                     "type": "string"
                 },
                 "is_active": {
+                    "description": "Pointer to a bool so the validation library doesn't complain if the value is false",
                     "type": "boolean"
                 },
                 "latitude": {

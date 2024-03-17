@@ -24,8 +24,6 @@ type OrderRepository interface {
 	UpdateRestaurantOrderState(id int, fbUID string, state string) error
 	// DeleteOrder deletes an order
 	DeleteOrder(id int) error
-	// Check if the user is the owner of the order
-	IsUserOwnerOfOrder(id int, fbUID string) (bool, error)
 	// Check if the restaurant is the owner of the order
 	IsRestaurantOwnerOfOrder(id int, fbUID string) (bool, error)
 }
@@ -128,21 +126,6 @@ func (r *OrderRepositoryImpl) FulfillOrder(id int, fbUID string) error {
 	}
 
 	return nil
-}
-
-func (r *OrderRepositoryImpl) IsUserOwnerOfOrder(id int, fbUID string) (bool, error) {
-	// Here we verify that the order exists and that the user is the owner of the order
-	// by joining the orders and users table and checking if the user's fb_user_id matches the one in the users table
-	var exists bool
-	vertificationQuery := `
-			SELECT EXISTS (
-				SELECT 1
-				FROM orders o
-				JOIN users u ON o.user_id = u.id
-				WHERE o.id = $1 AND u.fb_user_id = $2
-		)`
-	err := r.db.QueryRow(vertificationQuery, id, fbUID).Scan(&exists)
-	return exists, err
 }
 
 func (r *OrderRepositoryImpl) IsRestaurantOwnerOfOrder(id int, fbUID string) (bool, error) {

@@ -12,6 +12,7 @@ import (
 type RestaurantService interface {
 	CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 	GetRestaurant(fbUID string) (*models.Restaurant, error)
+	GetRestaurantByID(restaurantID string) (*models.Restaurant, error)
 	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 	GetLogoUploadURL(UID, uploadBucketName string) (string, string, error)
 }
@@ -39,6 +40,15 @@ func (s *RestaurantServiceImpl) GetRestaurant(fbUID string) (*models.Restaurant,
 	if err != nil {
 		// Wrap the error returned by the repository and add some context
 		return nil, fmt.Errorf("failed to get restaurant: %w", err)
+	}
+	return restaurant, nil
+}
+
+func (s *RestaurantServiceImpl) GetRestaurantByID(restaurantID string) (*models.Restaurant, error) {
+	restaurant, err := s.restaurantRepository.GetRestaurantByID(restaurantID)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return nil, fmt.Errorf("failed to get restaurant by ID: %w", err)
 	}
 	return restaurant, nil
 }

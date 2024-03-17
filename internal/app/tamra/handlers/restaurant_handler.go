@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 )
@@ -124,6 +125,29 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(restaurant)
 	h.logger.Infof("Request ID %s: Finished processing request to get restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
+}
+
+func (h *RestaurantHandler) GetRestaurantByID(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to get restaurant by ID.", r.Context().Value(chimiddleware.RequestIDKey))
+	restaurantID := chi.URLParam(r, "restaurantID")
+
+	restaurant, err := h.restaurantService.GetRestaurantByID(restaurantID)
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			h.logger.WithError(err).Errorf("Request ID %s: Restaurant not found", r.Context().Value(chimiddleware.RequestIDKey))
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "restaurant not found")
+			return
+		}
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to get restaurant", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get restaurant")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(restaurant)
+	h.logger.Infof("Request ID %s: Finished processing request to get restaurant by ID.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
 // UpdateRestaurant godoc

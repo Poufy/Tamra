@@ -21,6 +21,7 @@ type OrderService interface {
 	AcceptOrder(id int, fbUID string) error
 	FulfillOrder(id int, fbUID string) error
 	RejectOrder(id int, fbUID string) error
+	CancelOrder(id int, fbUID string) error
 	ReassignOrder(id int, fbUID string) error
 }
 
@@ -139,7 +140,6 @@ func (s *OrderServiceImpl) AcceptOrder(id int, fbUID string) error {
 func (s *OrderServiceImpl) FulfillOrder(id int, fbUID string) error {
 	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "FULFILLED")
 	if err != nil {
-
 		return fmt.Errorf("failed to fulfill order: %w", err)
 	}
 
@@ -149,8 +149,16 @@ func (s *OrderServiceImpl) FulfillOrder(id int, fbUID string) error {
 func (s *OrderServiceImpl) RejectOrder(id int, fbUID string) error {
 	err := s.orderRepository.UpdateUserOrderState(id, fbUID, "REJECTED")
 	if err != nil {
-
 		return fmt.Errorf("failed to reject order: %w", err)
+	}
+
+	return nil
+}
+
+func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
+	err := s.orderRepository.UpdateUserOrderState(id, fbUID, "CANCELLED")
+	if err != nil {
+		return fmt.Errorf("failed to cancel order: %w", err)
 	}
 
 	return nil

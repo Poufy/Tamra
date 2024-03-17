@@ -714,6 +714,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_active": {
+                    "description": "Pointer to a bool so the validation library doesn't complain if the value is false",
                     "type": "boolean"
                 },
                 "latitude": {
@@ -919,7 +920,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1",
-	Host:             "localhost:8080",
+	Host:             "tamra.gulbababaklava.com",
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "Tamra API",

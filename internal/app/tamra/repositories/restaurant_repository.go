@@ -11,6 +11,8 @@ type RestaurantRepository interface {
 	CreateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 	// GetRestaurant returns a restaurant by its ID
 	GetRestaurant(fbUID string) (*models.Restaurant, error)
+	// GetRestaurantByID returns a restaurant by its ID
+	GetRestaurantByID(restaurantID string) (*models.Restaurant, error)
 	// UpdateRestaurant updates a restaurant
 	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 }
@@ -32,6 +34,18 @@ func (r *RestaurantRepositoryImpl) CreateRestaurant(restaurant *models.Restauran
 func (r *RestaurantRepositoryImpl) GetRestaurant(fbUID string) (*models.Restaurant, error) {
 	restaurant := &models.Restaurant{}
 	err := r.db.QueryRow("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url, created_at, updated_at FROM restaurants WHERE id = $1", fbUID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
+	// Return a custom error if the restaurant is not found so that the service or handler can handle it.
+	// In this case we want to return a 404 status code
+	if err == sql.ErrNoRows {
+		return nil, utils.ErrNotFound
+	}
+
+	return restaurant, err
+}
+
+func (r *RestaurantRepositoryImpl) GetRestaurantByID(restaurantID string) (*models.Restaurant, error) {
+	restaurant := &models.Restaurant{}
+	err := r.db.QueryRow("SELECT id, name, ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude, location_description, phone_number, logo_url, created_at, updated_at FROM restaurants WHERE id = $1", restaurantID).Scan(&restaurant.ID, &restaurant.Name, &restaurant.Longitude, &restaurant.Latitude, &restaurant.LocationDescription, &restaurant.PhoneNumber, &restaurant.LogoURL, &restaurant.CreatedAt, &restaurant.UpdatedAt)
 	// Return a custom error if the restaurant is not found so that the service or handler can handle it.
 	// In this case we want to return a 404 status code
 	if err == sql.ErrNoRows {
