@@ -127,6 +127,18 @@ func (h *RestaurantHandler) GetRestaurant(w http.ResponseWriter, r *http.Request
 	h.logger.Infof("Request ID %s: Finished processing request to get restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
+// GetRestaurantByID godoc
+//
+//	@Summary		Get a restaurant by ID
+//	@Description	Get a restaurant by the restaurant ID
+//	@Tags			restaurants
+//	@Produce		json
+//	@Param			restaurantID	path	string	true	"Restaurant ID"
+//	@Security		jwt
+//	@Success		200	{object}	models.Restaurant	"Restaurant"
+//	@Failure		404	{string}	string				"Restaurant not found"
+//	@Failure		500	{string}	string				"Failed to get restaurant"
+//	@Router			/restaurants/{restaurantID} [get]
 func (h *RestaurantHandler) GetRestaurantByID(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to get restaurant by ID.", r.Context().Value(chimiddleware.RequestIDKey))
 	restaurantID := chi.URLParam(r, "restaurantID")
