@@ -4,8 +4,6 @@ import (
 	"Tamra/internal/pkg/models"
 	"Tamra/internal/pkg/utils"
 	"database/sql"
-
-	"github.com/sirupsen/logrus"
 )
 
 //? Define generic error messages as the errors shouldn't be tied to the repository implementation
@@ -53,7 +51,6 @@ func (r *UserRepositoryImpl) GetUser(userId string) (*models.User, error) {
 		return nil, utils.ErrNotFound
 	}
 
-	logrus.Info("User: ", user)
 	return user, err
 }
 

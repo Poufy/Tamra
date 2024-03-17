@@ -2,7 +2,7 @@
 INSERT INTO users (id, location, is_active, fcm_token, phone, radius, last_order_received)
 VALUES
     ('user1', ST_SetSRID(ST_MakePoint(-77.0364, 38.8951), 4326), true, 'token1', '+09055234232', 10, CURRENT_TIMESTAMP),
-    ('user2', ST_SetSRID(ST_MakePoint(-77.0364, 38.8951), 4326), true, 'token2', '+09055234234', 20, CURRENT_TIMESTAMP),
+    ('user2', ST_SetSRID(ST_MakePoint(-77.0364, 38.8951), 4326), true, 'token2', '+09055234234', 20, CURRENT_TIMESTAMP);
     
 
 -- Seed data for restaurants table
@@ -12,7 +12,7 @@ VALUES
     ('restaurant2', 'restaurant2', 'https://www.google.com', ST_SetSRID(ST_MakePoint(-74.0364, 38.8951), 4326), '+09055234234', 'restaurant2 location');
 
 -- Seed data for orders table
-INSERT INTO orders (id, user_id, restaurant_id, status, location)
+INSERT INTO orders (id, code, description, state, user_id, restaurant_id)
 VALUES
-    ('order1', 'user1', 'restaurant1', 'PENDING', ST_SetSRID(ST_MakePoint(-70.0364, 38.8951), 4326)),
-    ('order2', 'user2', 'restaurant2', 'PENDING', ST_SetSRID(ST_MakePoint(-71.0364, 38.8951), 4326));
+    (1, 'XYSDFS', 'order1 description', 'PENDING', 'user1', 'restaurant1'),
+    (2, 'FSHWRY', 'order2 description', 'PENDING', 'user2', 'restaurant2');
