@@ -52,7 +52,7 @@ func (r *OrderRepositoryImpl) GetOrder(id int, fbUID string) (*models.Order, err
 }
 
 func (r *OrderRepositoryImpl) GetUserOrders(userID string) ([]*models.Order, error) {
-	rows, err := r.db.Query("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE user_id = $1 AND state = 'PENDING'", userID)
+	rows, err := r.db.Query("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE user_id = $1 AND (state = 'PENDING' OR state = 'ACCEPTED')", userID)
 	if err != nil {
 		return nil, err
 	}
