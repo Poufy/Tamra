@@ -26,7 +26,8 @@ phases:
       # - echo "Starting test database setup..."
       # - docker pull postgis/postgis
       # - docker run --name ${TEST_DB_NAME} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_USER=${TEST_DB_USER} -e POSTGRES_PASSWORD=${TEST_DB_PASSWORD} -p ${TEST_DB_PORT}:5432 -d postgis/postgis 
-      - docker-compose -f ./deployments/docker-compose-test.yml up
+      - docker-compose -f ./deployments/docker-compose-test.yml up -d db
+      - docker-compose -f ./deployments/docker-compose-test.yml run --rm app
       - echo "Tests ran successfully."
       # - echo "Applying migrations..."
       # - docker run --rm -v $(pwd)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
@@ -45,12 +46,12 @@ phases:
       - swag init -d ./cmd/tamra,./internal/app/tamra/handlers -g main.go --parseInternal --parseDependency -o docs
       - echo "Zipping the docs directory into the docs directory of the zip"
       - zip -ur bin/bootstrap.zip docs/
-      - echo "Deploying with serverless..."
-      - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
   post_build:
     commands:
       - echo "Cleaning up..."
       - docker-compose -f ./deployments/docker-compose-test.yml down
+      - echo "Deploying with serverless..."
+      - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
       - echo "Deployment completed."
 
 artifacts:
