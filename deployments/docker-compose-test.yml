@@ -16,6 +16,8 @@ services:
       - FIREBASE_CONFIG=firebaseConfig.json
       - RESTAURANT_LOGOS_BUCKET=dev-tamra-restaurant-logos
       - PGPASSWORD=mysecretpassword
+    networks:
+      - tamra-test-network
   
 
   db:
