@@ -10,9 +10,10 @@ export DB_NAME=tamra-postgis-test
 # wait-for-db.sh
 # Wait for the database to be ready before starting the application
 echo "Waiting for database to be ready..."
-while ! nc -z $DB_HOST $DB_PORT; do
-  sleep 5
-done
+# while ! pg_isready -h $DB_HOST -p $DB_PORT > /dev/null 2> /dev/null; do
+#   sleep 1
+# done
+sleep 6
 
 echo "Database is ready. Running migrations..."
 
