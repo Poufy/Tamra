@@ -26,10 +26,8 @@ phases:
       # - echo "Starting test database setup..."
       # - docker pull postgis/postgis
       # - docker run --name ${TEST_DB_NAME} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_USER=${TEST_DB_USER} -e POSTGRES_PASSWORD=${TEST_DB_PASSWORD} -p ${TEST_DB_PORT}:5432 -d postgis/postgis 
-      - docker-compose -f ./deployments/docker-compose-test.yml up -d
-      - docker ps -a
-      - echo "Waiting for database to become ready..."
-      - sleep 10
+      - docker-compose -f ./deployments/docker-compose-test.yml up
+      - echo "Tests ran successfully."
       # - echo "Applying migrations..."
       # - docker run --rm -v $(pwd)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
       # - echo "Seeding database..."
@@ -37,7 +35,8 @@ phases:
       # Make sure to set the PGPASSWORD environment variable to avoid the password prompt.
       # - docker run --rm -v $(pwd)/seeds:/seeds --network host -e PGPASSWORD=${TEST_DB_PASSWORD} postgres:15 psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f /seeds/seed.sql
       # - echo "Database setup completed."
-
+  build:
+    commands:
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
       - echo "Zipping the binary file into the root directory of the zip" 
       # The -j flag will store just the file, not the full path. The bootstrap file must be in the root directory of the zip.
@@ -46,10 +45,6 @@ phases:
       - swag init -d ./cmd/tamra,./internal/app/tamra/handlers -g main.go --parseInternal --parseDependency -o docs
       - echo "Zipping the docs directory into the docs directory of the zip"
       - zip -ur bin/bootstrap.zip docs/
-  build:
-    commands:
-      # - echo "Running Go tests..."
-      # - go test -v ./...
       - echo "Deploying with serverless..."
       - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
   post_build:
