@@ -6,7 +6,7 @@ env:
     TEST_DB_USER: "postgres"
     TEST_DB_PASSWORD: "mysecretpassword"
     TEST_DB_NAME: "tamra-postgis-test"
-    TEST_DB_PORT: "5432"
+    TEST_DB_PORT: "5433"
     POSTGRES_DB: "tamra-postgis-test"
     # https://hub.docker.com/_/postgres#:~:text=for%20more%20details.-,POSTGRES_DB,-This%20optional%20environment
 phases:
@@ -25,12 +25,11 @@ phases:
     commands:
       - echo "Starting test database setup..."
       - docker pull postgis/postgis
-      # - docker run --name ${TEST_DB_NAME} -e POSTGRES_PASSWORD=${TEST_DB_PASSWORD} -p ${TEST_DB_PORT}:5432 -u ${TEST_DB_USER} -d postgis/postgis 
-      - docker-compose -f ./deployments/docker-compose-test.yml up -d
+      - docker run --name ${TEST_DB_NAME} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_USER=${TEST_DB_USER} -e POSTGRES_PASSWORD=${TEST_DB_PASSWORD} -p ${TEST_DB_PORT}:5432 -d postgis/postgis 
+      # - docker-compose -f ./deployments/docker-compose-test.yml up -d
       - docker ps -a
       - echo "Waiting for database to become ready..."
       - sleep 10
-      - echo ${TEST_DB_USER} ${TEST_DB_PORT} ${TEST_DB_NAME} ${TEST_DB_PASSWORD}
       # - until PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -p ${TEST_DB_PORT} -d ${TEST_DB_NAME} -c '\q'; do sleep 8; done
       - echo "Applying migrations..."
       # - migrate -path ./migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
