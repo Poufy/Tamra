@@ -18,7 +18,7 @@ phases:
   pre_build:
     commands:
       - echo "Starting test database setup..."
-      - docker-compose -f ./deployments/docker-compose.test.yml up -d
+      - docker-compose -f ./deployments/docker-compose-test.yml up -d
       - echo "Waiting for database to become ready..."
       - until PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -p ${TEST_DB_PORT} -d ${TEST_DB_NAME} -c '\q'; do sleep 8; done
       - echo "Applying migrations..."
@@ -44,7 +44,7 @@ phases:
   post_build:
     commands:
       - echo "Cleaning up..."
-      - docker-compose -f ./deployments/docker-compose.test.yml down
+      - docker-compose -f ./deployments/docker-compose-test.yml down
       - echo "Deployment completed."
 
 artifacts:
