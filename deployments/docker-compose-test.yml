@@ -1,22 +1,22 @@
 version: '3.8'
 
 services:
-  # app:
-  #   build:
-  #     context: ../
-  #     dockerfile: deployments/Dockerfile
-  #   ports:
-  #     - "8080:8080" # Expose the port your app runs on
-  #   depends_on:
-  #     - db
-  #   environment:
-  #     - DB_CONNECTION_STRING=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable
-  #     - PORT=8080
-  #     - LOG_LEVEL=debug
-  #     - FIREBASE_CONFIG=firebaseConfig.json
-  #     - RESTAURANT_LOGOS_BUCKET=dev-tamra-restaurant-logos
-  # networks:
-  #   - tamra-test-network
+  app:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    ports:
+      - "8080:8080" # Expose the port your app runs on
+    depends_on:
+      - db
+    environment:
+      - DB_CONNECTION_STRING=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable
+      - PORT=8080
+      - LOG_LEVEL=debug
+      - FIREBASE_CONFIG=firebaseConfig.json
+      - RESTAURANT_LOGOS_BUCKET=dev-tamra-restaurant-logos
+      - PGPASSWORD=mysecretpassword
+  
 
   db:
     image: postgis/postgis
@@ -26,13 +26,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: tamra-postgis-test
-    # networks:
-    #   - tamra-test-network
+    networks:
+      - tamra-test-network
 
-    # Define the network. The reason it is empty is because we want to use the default network driver.
-    # networks:
-    #   tamra-test-network:
+# Define the network. The reason it is empty is because we want to use the default network driver.
+networks:
+  tamra-test-network:
 
     # Define the volume to store the data.
-# volumes:
-#   postgres_data:
+    # volumes:
+    #   postgres_data:

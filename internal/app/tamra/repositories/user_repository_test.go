@@ -11,7 +11,7 @@ import (
 
 var userRepo UserRepository
 
-var dbConnectionString string = "postgresql://postgres:mysecretpassword@localhost:5433/tamra-postgis-test?sslmode=disable"
+var dbConnectionString string = "postgresql://postgres:mysecretpassword@db:5432/tamra-postgis-test?sslmode=disable"
 
 func TestMain(m *testing.M) {
 

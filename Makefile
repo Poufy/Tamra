@@ -63,7 +63,7 @@ migrate-test-db-down:
 # We set PGPASSWORD as an environment variable to avoid the password prompt
 seed-test-db:
 	@echo "Seeding test database..."
-	PGPASSWORD=$(TEST_DB_PASSWORD) psql -h localhost -p $(TEST_DB_PORT) -U $(TEST_DB_USER) -d $(TEST_DB_NAME) -a -f ./testdata/seed.sql
+	PGPASSWORD=$(TEST_DB_PASSWORD) psql -h localhost -p $(TEST_DB_PORT) -U $(TEST_DB_USER) -d $(TEST_DB_NAME) -a -f ./seeds/seed.sql
 
 delete-test-db:
 	@echo "Deleting test database..."
