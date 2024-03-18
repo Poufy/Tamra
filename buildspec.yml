@@ -16,7 +16,7 @@ phases:
       - npm install -g serverless
       - go install github.com/swaggo/swag/cmd/swag@latest
       # Install postgresql client using amaz-linux-extras https://docs.aws.amazon.com/linux/al2/ug/al2-extras-list.html
-      - sudo yum update
+      - sudo yum -y update
       - sudo yum search "postgres"
       - sudo yum install -y postgresql15
   pre_build:
