@@ -17,7 +17,7 @@ RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 # Install psql
 RUN apt-get update && apt-get install -y postgresql-client
 
-COPY ./scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+COPY ./scripts/wait-for-db.sh /usr/local/bin/wait-for-db.sh
 # Run the migrations
 # RUN migrate -path ./migrations -database "postgres://postgres:mysecretpassword@db:5432/tamra-postgis-test?sslmode=disable" up
 
@@ -31,4 +31,4 @@ COPY ./scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 # CMD ["go", "run", "cmd/tamra/main.go"]
 # ENTRYPOINT ["./bin/tamra", "-port=8080", "-db=postgres://postgres:mysecretpassword@db:5432/tamra-postgis?sslmode=disable", "-log-level=debug", "-firebase-config=firebaseConfig.json", "restaurant-logos-bucket=dev-tamra-restaurant-logos"]
 # CMD ["air", "-c", ".air.toml"]
-CMD ["sh", "-c", "/usr/local/bin/wait-for-it.sh && go test -v ./..."]
+CMD ["sh", "-c", "/usr/local/bin/wait-for-db.sh && go test -v ./..."]
