@@ -15,8 +15,8 @@ phases:
       - yum install -y nodejs
       - npm install -g serverless
       - go install github.com/swaggo/swag/cmd/swag@latest
-      # Install postgresql client
-      - dnf install postgresql
+      # Install postgresql client using amaz-linux-extras https://docs.aws.amazon.com/linux/al2/ug/al2-extras-list.html
+      - amazon-linux-extras install -y postgresql14
   pre_build:
     commands:
       - echo "Starting test database setup..."
