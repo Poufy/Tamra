@@ -24,11 +24,12 @@ phases:
       - echo "Starting test database setup..."
       - docker-compose -f ./deployments/docker-compose-test.yml up -d
       - echo "Waiting for database to become ready..."
+      - echo "Running the command: until PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -p ${TEST_DB_PORT} -d ${TEST_DB_NAME} -c '\q'; do sleep 8; done"
       - until PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -p ${TEST_DB_PORT} -d ${TEST_DB_NAME} -c '\q'; do sleep 8; done
       - echo "Applying migrations..."
       - migrate -path ./migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
       - echo "Seeding database..."
-      - PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f ./seeds/seed.sql
+      - PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f ./testdata/seed.sql
       - echo "Database setup completed."
 
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
