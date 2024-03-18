@@ -9,6 +9,7 @@ TEST_DB_USER = postgres
 TEST_DB_PASSWORD = mysecretpassword
 TEST_DB_PORT = 5433
 TEST_DB_CONTAINER_NAME = tamra-postgis-test
+DOCKER_COMPOSE_TEST_FILE = ./deployments/docker-compose-test.yml
 
 # Build and run Docker Compose
 docker-up:
@@ -47,8 +48,8 @@ all : swagger local
 
 create-test-db:
 	@echo "Creating test database..."
-	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_DB=$(TEST_DB_NAME) -e POSTGRES_USER=$(TEST_DB_USER) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -p $(TEST_DB_PORT):5432 -d postgis/postgis
-	until docker exec $(TEST_DB_CONTAINER_NAME) pg_isready; do sleep 7; done
+	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up -d
+	sleep 8
 
 migrate-test-db:
 	@echo "Running migrations for test database..."
@@ -65,7 +66,7 @@ seed-test-db:
 
 delete-test-db:
 	@echo "Deleting test database..."
-	docker stop $(TEST_DB_CONTAINER_NAME) && docker rm $(TEST_DB_CONTAINER_NAME)
+	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) down
 
 run-tests:
 	@echo "Running tests..."

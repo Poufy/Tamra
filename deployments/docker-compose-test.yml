@@ -16,24 +16,22 @@ services:
       - FIREBASE_CONFIG=firebaseConfig.json
       - RESTAURANT_LOGOS_BUCKET=dev-tamra-restaurant-logos
     networks:
-      - tamra-network
+      - tamra-test-network
 
   db:
     image: postgis/postgis
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: tamra-postgis
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: tamra-postgis-test
     networks:
-      - tamra-network
+      - tamra-test-network
 
 # Define the network. The reason it is empty is because we want to use the default network driver.
 networks:
-  tamra-network:
+  tamra-test-network:
 
 # Define the volume to store the data.
 volumes:

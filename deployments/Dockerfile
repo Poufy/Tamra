@@ -16,7 +16,7 @@ RUN go mod download && go mod verify
 # RUN go install github.com/cosmtrek/air@latest
 
 # Build the application
-# RUN go build -o ./bin/tamra ./cmd/tamra/
+RUN go build -o ./bin/tamra ./cmd/tamra/
 
 # Command to run the executable
 # CMD ["go", "run", "cmd/tamra/main.go"]
