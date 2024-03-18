@@ -3,3 +3,4 @@
 firebaseConfig.json
 bin
 .env
+*.test
