@@ -22,11 +22,7 @@ COPY ./scripts/wait-for-db.sh /usr/local/bin/wait-for-db.sh
 # Run the script and the go tests
 RUN chmod +x /usr/local/bin/wait-for-db.sh
 
-RUN /usr/local/bin/wait-for-db.sh
-
-RUN go test -v ./...
-
-
+CMD ["sh", "-c", "/usr/local/bin/wait-for-db.sh && go test -v ./..."]
 
 # Run the migrations
 # RUN migrate -path ./migrations -database "postgres://postgres:mysecretpassword@db:5432/tamra-postgis-test?sslmode=disable" up
