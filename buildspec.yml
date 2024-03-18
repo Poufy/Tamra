@@ -31,7 +31,8 @@ phases:
       - echo ${TEST_DB_USER} ${TEST_DB_PORT} ${TEST_DB_NAME} ${TEST_DB_PASSWORD}
       # - until PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -p ${TEST_DB_PORT} -d ${TEST_DB_NAME} -c '\q'; do sleep 8; done
       - echo "Applying migrations..."
-      - migrate -path ./migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
+      # - migrate -path ./migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
+      - docker run --rm -v $(pwd)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
       - echo "Seeding database..."
       - PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f ./testdata/seed.sql
       - echo "Database setup completed."

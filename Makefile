@@ -7,7 +7,7 @@ HANDLERS_DIR = ./internal/app/tamra/handlers
 TEST_DB_NAME = tamra-postgis-test
 TEST_DB_USER = postgres
 TEST_DB_PASSWORD = mysecretpassword
-TEST_DB_PORT = 5433
+TEST_DB_PORT = 5432
 TEST_DB_CONTAINER_NAME = tamra-postgis-test
 DOCKER_COMPOSE_TEST_FILE = ./deployments/docker-compose-test.yml
 
@@ -51,9 +51,10 @@ create-test-db:
 	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up -d
 	sleep 8
 
+# or without using docker, install the cli: migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
 migrate-test-db:
 	@echo "Running migrations for test database..."
-	migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
+	docker run --rm -v $(PWD)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
 
 migrate-test-db-down:
 	@echo "Running migrations for test database..."
