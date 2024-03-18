@@ -37,7 +37,8 @@ phases:
       - docker run --rm -v $(pwd)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
       - echo "Seeding database..."
       # - PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f ./testdata/seed.sql
-      - docker run --rm -v $(pwd)/testdata:/testdata --network host postgres:15 psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f /testdata/seed.sql
+      # Make sure to set the PGPASSWORD environment variable to avoid the password prompt.
+      - docker run --rm -v $(pwd)/testdata:/testdata --network host -e PGPASSWORD=${TEST_DB_PASSWORD} postgres:15 psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f /testdata/seed.sql
       - echo "Database setup completed."
 
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
