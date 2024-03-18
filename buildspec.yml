@@ -16,7 +16,7 @@ phases:
       - npm install -g serverless
       - go install github.com/swaggo/swag/cmd/swag@latest
       # Install postgresql client
-      - yum install -y postgresql
+      - dnf install postgresql
   pre_build:
     commands:
       - echo "Starting test database setup..."
