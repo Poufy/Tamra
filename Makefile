@@ -7,7 +7,7 @@ HANDLERS_DIR = ./internal/app/tamra/handlers
 TEST_DB_NAME = tamra-postgis-test
 TEST_DB_USER = postgres
 TEST_DB_PASSWORD = mysecretpassword
-TEST_DB_PORT = 5433
+TEST_DB_PORT = 5432
 TEST_DB_CONTAINER_NAME = tamra-postgis-test
 DOCKER_COMPOSE_TEST_FILE = ./deployments/docker-compose-test.yml
 

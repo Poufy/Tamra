@@ -6,7 +6,7 @@ env:
     TEST_DB_USER: "postgres"
     TEST_DB_PASSWORD: "mysecretpassword"
     TEST_DB_NAME: "tamra-postgis-test"
-    TEST_DB_PORT: "5433"
+    TEST_DB_PORT: "5432"
     POSTGRES_DB: "tamra-postgis-test"
     # https://hub.docker.com/_/postgres#:~:text=for%20more%20details.-,POSTGRES_DB,-This%20optional%20environment
 phases:
