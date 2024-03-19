@@ -229,24 +229,34 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Finished processing request to get users.", r.Context().Value(chimiddleware.RequestIDKey))
 }
 
-// func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-// 	idStr := chi.URLParam(r, "id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		h.logger.WithError(err).Error("invalid user ID")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		fmt.Fprint(w, "invalid user ID")
-// 		return
-// 	}
+// DeleteUser godoc
+//
+//	@Summary		Delete a user
+//	@Description	Delete a user
+//	@Tags			users
+//	@Security		jwt
+//	@Success		200	{string}	string	"User deleted"
+//	@Failure		500	{string}	string	"Failed to delete user"
+//	@Router			/users/me [delete]
+func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to delete user.", r.Context().Value(chimiddleware.RequestIDKey))
+	userID, ok := r.Context().Value("UID").(string)
+	if !ok {
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
 
-// 	err = h.userService.DeleteUser(id)
-// 	if err != nil {
-// 		h.logger.WithError(err).Error("failed to delete user")
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		fmt.Fprint(w, "failed to delete user")
-// 		return
-// 	}
+	err := h.userService.DeleteUser(userID)
+	if err != nil {
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to delete user", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to delete user")
+		return
+	}
 
-// 	h.logger.Infof("user deleted: %v", id)
-// 	w.WriteHeader(http.StatusOK)
-// }
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "user deleted")
+	h.logger.Infof("Request ID %s: Finished processing request to delete user.", r.Context().Value(chimiddleware.RequestIDKey))
+}

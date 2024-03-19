@@ -262,3 +262,36 @@ func (h *RestaurantHandler) GetLogoUploadURL(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(presignedURLResposne)
 	h.logger.Infof("Request ID %s: Finished processing request to get logo upload URL.", r.Context().Value(chimiddleware.RequestIDKey))
 }
+
+// DeleteRestaurant godoc
+//
+//	@Summary		Delete a restaurant
+//	@Description	Delete a restaurant
+//	@Tags			restaurants
+//	@Security		jwt
+//	@Success		204	{string}	string	"Restaurant deleted"
+//	@Failure		500	{string}	string	"Failed to delete restaurant"
+//	@Router			/restaurants/me [delete]
+func (h *RestaurantHandler) DeleteRestaurant(w http.ResponseWriter, r *http.Request) {
+	h.logger.Infof("Request ID %s: Received request to delete restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
+	// Extract the user ID from the request context
+	UID := r.Context().Value("UID").(string)
+
+	if UID == "" {
+		h.logger.Errorf("Request ID %s: Failed to get user ID from request context", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to get user ID from request context")
+		return
+	}
+
+	err := h.restaurantService.DeleteRestaurant(UID)
+	if err != nil {
+		h.logger.WithError(err).Errorf("Request ID %s: Failed to delete restaurant", r.Context().Value(chimiddleware.RequestIDKey))
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "failed to delete restaurant")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	h.logger.Infof("Request ID %s: Finished processing request to delete restaurant.", r.Context().Value(chimiddleware.RequestIDKey))
+}

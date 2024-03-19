@@ -15,6 +15,8 @@ type RestaurantRepository interface {
 	GetRestaurantByID(restaurantID string) (*models.Restaurant, error)
 	// UpdateRestaurant updates a restaurant
 	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
+	// Delete a restaurant
+	DeleteRestaurant(id string) error
 }
 
 type RestaurantRepositoryImpl struct {
@@ -85,7 +87,7 @@ func (r *RestaurantRepositoryImpl) GetRestaurants() ([]*models.Restaurant, error
 	return restaurants, nil
 }
 
-func (r *RestaurantRepositoryImpl) DeleteRestaurant(id int) error {
+func (r *RestaurantRepositoryImpl) DeleteRestaurant(id string) error {
 	_, err := r.db.Exec("DELETE FROM restaurants WHERE id = $1", id)
 	return err
 }

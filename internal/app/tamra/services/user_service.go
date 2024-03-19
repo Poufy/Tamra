@@ -15,6 +15,7 @@ type UserService interface {
 	GetUser(userID string) (*models.User, error)
 	UpdateUser(user *models.User) (*models.User, error)
 	GetUsers() ([]*models.User, error)
+	DeleteUser(id string) error
 }
 
 type UserServiceImpl struct {
@@ -62,11 +63,11 @@ func (s *UserServiceImpl) GetUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-// func (s *UserServiceImpl) DeleteUser(id int) error {
-// 	err := s.userRepository.DeleteUser(id)
-// 	if err != nil {
-// 		// Wrap the error returned by the repository and add some context
-// 		return fmt.Errorf("failed to delete user: %w", err)
-// 	}
-// 	return nil
-// }
+func (s *UserServiceImpl) DeleteUser(id string) error {
+	err := s.userRepository.DeleteUser(id)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	return nil
+}

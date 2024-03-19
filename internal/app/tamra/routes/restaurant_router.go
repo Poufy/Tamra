@@ -29,6 +29,7 @@ func (router *RestaurantRouter) GetRouter() chi.Router {
 		r.Get("/me", router.restaurantHandler.GetRestaurant)
 		r.Get("/logo/uploadurl", router.restaurantHandler.GetLogoUploadURL)
 		r.Patch("/me", router.restaurantHandler.UpdateRestaurant)
+		r.Delete("/me", router.restaurantHandler.DeleteRestaurant)
 	})
 
 	r.With(router.userAuthMiddleware).Group(func(r chi.Router) {

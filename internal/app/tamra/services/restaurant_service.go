@@ -15,6 +15,7 @@ type RestaurantService interface {
 	GetRestaurantByID(restaurantID string) (*models.Restaurant, error)
 	UpdateRestaurant(restaurant *models.Restaurant) (*models.Restaurant, error)
 	GetLogoUploadURL(UID, uploadBucketName string) (string, string, error)
+	DeleteRestaurant(restaurantID string) error
 }
 
 type RestaurantServiceImpl struct {
@@ -69,4 +70,13 @@ func (s *RestaurantServiceImpl) GetLogoUploadURL(UID, uploadBucketName string) (
 		return "", "", fmt.Errorf("failed to get presigned URL: %w", err)
 	}
 	return presignedURL, storedFileURL, nil
+}
+
+func (s *RestaurantServiceImpl) DeleteRestaurant(restaurantID string) error {
+	err := s.restaurantRepository.DeleteRestaurant(restaurantID)
+	if err != nil {
+		// Wrap the error returned by the repository and add some context
+		return fmt.Errorf("failed to delete restaurant: %w", err)
+	}
+	return nil
 }

@@ -30,5 +30,6 @@ func (router *UserRouter) GetRouter() chi.Router {
 	// r.Get("/", router.userHandler.GetUsers)
 	r.Get("/me", router.userHandler.GetUser)
 	r.Patch("/me", router.userHandler.UpdateUser)
+	r.Delete("/me", router.userHandler.DeleteUser)
 	return r
 }

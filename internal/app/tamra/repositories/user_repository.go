@@ -26,6 +26,8 @@ type UserRepository interface {
 	GetUserToReceiveOrder(restaurantID string) (*models.User, error)
 	// GetUsers returns a list of users
 	GetUsers() ([]*models.User, error)
+	// DeleteUser deletes a user
+	DeleteUser(id string) error
 }
 
 type UserRepositoryImpl struct {
@@ -107,7 +109,7 @@ func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID string) (*models
 	return user, err
 }
 
-func (r *UserRepositoryImpl) DeleteUser(id int) error {
+func (r *UserRepositoryImpl) DeleteUser(id string) error {
 	_, err := r.db.Exec("DELETE FROM users WHERE id = $1", id)
 	return err
 }
