@@ -41,7 +41,7 @@ all : swagger local
 # ./scripts/wait-for-it.sh localhost:$(TEST_DB_PORT) -t 60
 create-test-db:
 	@echo "Creating test database..."
-	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up -d
+	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up
 	sleep 10
 
 # or without using docker, install the cli: migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
