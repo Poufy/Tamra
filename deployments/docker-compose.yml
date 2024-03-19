@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: tamra-postgis
+    networks:
+      - tamra-test-network
+
+# Define the network. The reason it is empty is because we want to use the default network driver.
+networks:
+  tamra-test-network:
+
+    # Define the volume to store the data.
+    # volumes:
+    #   postgres_data:

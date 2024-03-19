@@ -25,7 +25,7 @@ import (
 //	@title						Tamra API
 //	@version					1
 //	@description				This is the API for the Tamra application
-//	@host						tamra.gulbababaklava.com
+//	@host						localhost:8080
 //	@BasePath					/api/v1
 //	@schemes					http https
 //

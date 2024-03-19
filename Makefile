@@ -7,19 +7,11 @@ HANDLERS_DIR = ./internal/app/tamra/handlers
 TEST_DB_NAME = tamra-postgis-test
 TEST_DB_USER = postgres
 TEST_DB_PASSWORD = mysecretpassword
-TEST_DB_PORT = 5432
+TEST_DB_PORT = 5433
 TEST_DB_CONTAINER_NAME = tamra-postgis-test
 DOCKER_COMPOSE_TEST_FILE = ./deployments/docker-compose-test.yml
 
-# Build and run Docker Compose
-docker-up:
-	@echo "Building and starting Docker containers..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up --build
-
-docker-down:
-	@echo "Stopping Docker containers..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) down
-
+# Build and run Docker Compose for local development
 docker-up-db:
 	@echo "Starting the database container..."
 	docker-compose -f $(DOCKER_COMPOSE_FILE) up db 
@@ -46,10 +38,11 @@ local:
 
 all : swagger local
 
+# ./scripts/wait-for-it.sh localhost:$(TEST_DB_PORT) -t 60
 create-test-db:
 	@echo "Creating test database..."
 	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up -d
-	sleep 8
+	sleep 10
 
 # or without using docker, install the cli: migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
 migrate-test-db:
@@ -73,6 +66,6 @@ run-tests:
 	@echo "Running tests..."
 	go test -v ./...
 
-test: create-test-db migrate-test-db run-tests delete-test-db
+test: create-test-db migrate-test-db seed-test-db run-tests delete-test-db
 
 .PHONY: migrate-up migrate-down docker-up docker-down swagger local docker-up-db docker-down-db create-test-db migrate-test-db seed-test-db run-tests test

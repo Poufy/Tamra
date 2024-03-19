@@ -174,7 +174,7 @@ definitions:
       radius:
         type: integer
     type: object
-host: tamra.gulbababaklava.com
+host: localhost:8080
 info:
   contact: {}
   description: This is the API for the Tamra application
@@ -337,6 +337,37 @@ paths:
       summary: Reject a order
       tags:
       - orders
+  /orders/{orderID}/cancel:
+    patch:
+      consumes:
+      - application/json
+      description: Cancel a order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: order not accepted
+          schema:
+            type: string
+        "500":
+          description: failed to cancel order
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Cancel a order
+      tags:
+      - orders
   /orders/restaurant:
     get:
       consumes:
@@ -421,6 +452,35 @@ paths:
       security:
       - jwt: []
       summary: Create a new restaurant
+      tags:
+      - restaurants
+  /restaurants/{restaurantID}:
+    get:
+      description: Get a restaurant by the restaurant ID
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: restaurantID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Restaurant
+          schema:
+            $ref: '#/definitions/models.Restaurant'
+        "404":
+          description: Restaurant not found
+          schema:
+            type: string
+        "500":
+          description: Failed to get restaurant
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Get a restaurant by ID
       tags:
       - restaurants
   /restaurants/logo/uploadurl:

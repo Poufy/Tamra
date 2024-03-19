@@ -2,35 +2,14 @@ package repositories
 
 import (
 	"Tamra/internal/pkg/models"
-	"Tamra/internal/pkg/utils"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var userRepo UserRepository
-
-var dbConnectionString string = "postgresql://postgres:mysecretpassword@db:5432/tamra-postgis-test?sslmode=disable"
-
-func TestMain(m *testing.M) {
-
-	db, err := utils.NewDB(dbConnectionString)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-
-	userRepo = NewUserRepository(db)
-
-	code := m.Run()
-
-	os.Exit(code)
-}
-
 func TestUserRepository_CreateUser(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+
 	// Set the id, phone, and FCM tokens to a random string to avoid conflicts with other tests
 	user := &models.User{
 		ID:        "dasdsad",
@@ -56,6 +35,8 @@ func TestUserRepository_CreateUser(t *testing.T) {
 }
 
 func TestUserRepository_GetUser(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+
 	user := &models.User{
 		ID:        "dasdshfgdad",
 		Longitude: 12.9715987,
@@ -85,6 +66,8 @@ func TestUserRepository_GetUser(t *testing.T) {
 }
 
 func TestUserRepository_GetUsers(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+
 	user := &models.User{
 		ID:        "dasdshsfad",
 		Longitude: 12.9715987,
@@ -108,6 +91,8 @@ func TestUserRepository_GetUsers(t *testing.T) {
 }
 
 func TestUserRepository_UpdateUser(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+
 	user := &models.User{
 		ID:        "gsdfds",
 		Longitude: 12.9715987,

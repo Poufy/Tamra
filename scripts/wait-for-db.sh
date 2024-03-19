@@ -2,7 +2,7 @@
 
 # Set the environment variables
 export DB_HOST=db
-export DB_PORT=5432
+export DB_PORT=5433
 export DB_USER=postgres
 export DB_PASSWORD=mysecretpassword
 export DB_NAME=tamra-postgis-test

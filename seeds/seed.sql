@@ -14,5 +14,5 @@ VALUES
 -- Seed data for orders table
 INSERT INTO orders (id, code, description, state, user_id, restaurant_id)
 VALUES
-    (1, 'XYSDFS', 'order1 description', 'PENDING', 'user1', 'restaurant1'),
-    (2, 'FSHWRY', 'order2 description', 'PENDING', 'user2', 'restaurant2');
+    (100, 'XYSDFS', 'order1 description', 'PENDING', 'user1', 'restaurant1'),
+    (300, 'FSHWRY', 'order2 description', 'PENDING', 'user2', 'restaurant2');
