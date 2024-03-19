@@ -19,7 +19,6 @@ services:
     networks:
       - tamra-test-network
   
-
   db:
     image: postgis/postgis
     ports:

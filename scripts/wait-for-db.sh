@@ -13,7 +13,7 @@ echo "Waiting for database to be ready..."
 # while ! pg_isready -h $DB_HOST -p $DB_PORT > /dev/null 2> /dev/null; do
 #   sleep 1
 # done
-sleep 6
+sleep 10
 
 echo "Database is ready. Running migrations..."
 
