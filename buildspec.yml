@@ -3,11 +3,7 @@ run-as: root
 
 env:
   variables:
-    TEST_DB_USER: "postgres"
-    TEST_DB_PASSWORD: "mysecretpassword"
-    TEST_DB_NAME: "tamra-postgis-test"
-    TEST_DB_PORT: "5432"
-    POSTGRES_DB: "tamra-postgis-test"
+    # POSTGRES_DB: "tamra-postgis-test"
     # https://hub.docker.com/_/postgres#:~:text=for%20more%20details.-,POSTGRES_DB,-This%20optional%20environment
 phases:
   install:
@@ -17,25 +13,12 @@ phases:
       - yum install -y nodejs
       - npm install -g serverless
       - go install github.com/swaggo/swag/cmd/swag@latest
-      # Install postgresql client using amaz-linux-extras https://docs.aws.amazon.com/linux/al2/ug/al2-extras-list.html
-      # - sudo yum -y update
-      # - sudo yum search "postgres"
-      # - sudo yum install -y postgresql15
   pre_build:
     commands:
-      # - echo "Starting test database setup..."
-      # - docker pull postgis/postgis
-      # - docker run --name ${TEST_DB_NAME} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_USER=${TEST_DB_USER} -e POSTGRES_PASSWORD=${TEST_DB_PASSWORD} -p ${TEST_DB_PORT}:5432 -d postgis/postgis 
-      - docker-compose -f ./deployments/docker-compose-test.yml up -d db
-      - docker-compose -f ./deployments/docker-compose-test.yml run --rm app
+      - docker-compose -f ./deployments/test.docker-compose.yml up -d db
+      # We use the --rm flag to remove the container after the tests are done. If it fails, that means the tests failed, otherwise, it will be removed with this command.
+      - docker-compose -f ./deployments/test.docker-compose.yml run --rm app
       - echo "Tests ran successfully."
-      # - echo "Applying migrations..."
-      # - docker run --rm -v $(pwd)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@localhost:${TEST_DB_PORT}/${TEST_DB_NAME}?sslmode=disable" up
-      # - echo "Seeding database..."
-      # - PGPASSWORD=${TEST_DB_PASSWORD} psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f ./seeds/seed.sql
-      # Make sure to set the PGPASSWORD environment variable to avoid the password prompt.
-      # - docker run --rm -v $(pwd)/seeds:/seeds --network host -e PGPASSWORD=${TEST_DB_PASSWORD} postgres:15 psql -h localhost -U ${TEST_DB_USER} -d ${TEST_DB_NAME} -p ${TEST_DB_PORT} -a -f /seeds/seed.sql
-      # - echo "Database setup completed."
   build:
     commands:
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go

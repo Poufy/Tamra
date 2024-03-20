@@ -9,22 +9,22 @@ TEST_DB_USER = postgres
 TEST_DB_PASSWORD = mysecretpassword
 TEST_DB_PORT = 5432
 TEST_DB_CONTAINER_NAME = tamra-postgis-test
-DOCKER_COMPOSE_TEST_FILE = ./deployments/docker-compose-test.yml
+DOCKER_COMPOSE_TEST_FILE = ./deployments/test.docker-compose.yml
 
 # Build and run Docker Compose for local development
-docker-up-db:
+dev-db-up:
 	@echo "Starting the database container..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up db 
+	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -p $(TEST_DB_PORT):5432 -d postgis/postgis
 
-docker-down-db:
+dev-db-down:
 	@echo "Stopping the database container..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) down db
+	docker stop $(TEST_DB_CONTAINER_NAME) && docker rm $(TEST_DB_CONTAINER_NAME)
 	
-migrate-up:
+migrate-dev-db-up:
 	@echo "Running migrations..."
 	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" up
 
-migrate-down:
+migrate-dev-db-down:
 	@echo "Running migrations..."
 	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" down
 
@@ -32,40 +32,19 @@ swagger:
 	@echo "Generating Swagger documentation..."
 	swag fmt && swag init -d $(MAIN_DIR),$(HANDLERS_DIR) -g main.go --parseInternal --parseDependency -o docs
 
-local:
+start:
 	@echo "Running the application locally..."
 	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable
 
-all : swagger local
-
-# ./scripts/wait-for-it.sh localhost:$(TEST_DB_PORT) -t 60
-create-test-db:
-	@echo "Creating test database..."
-	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up
-	sleep 10
-
-# or without using docker, install the cli: migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
-migrate-test-db:
-	@echo "Running migrations for test database..."
-	docker run --rm -v $(PWD)/migrations:/migrations --network host migrate/migrate -path=/migrations -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
-
-migrate-test-db-down:
-	@echo "Running migrations for test database..."
-	migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" down
-
-# We set PGPASSWORD as an environment variable to avoid the password prompt
-seed-test-db:
-	@echo "Seeding test database..."
-	PGPASSWORD=$(TEST_DB_PASSWORD) psql -h localhost -p $(TEST_DB_PORT) -U $(TEST_DB_USER) -d $(TEST_DB_NAME) -a -f ./seeds/seed.sql
-
-delete-test-db:
-	@echo "Deleting test database..."
-	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) down
+dev : swagger start
 
 run-tests:
 	@echo "Running tests..."
 	go test -v ./...
 
-test: create-test-db migrate-test-db seed-test-db run-tests delete-test-db
+# Run tests in Docker. This is the process that will be used in CI/CD on AWS CodeBuild
+docker-test:
+	@echo "Running tests..."
+	docker-compose -f $(DOCKER_COMPOSE_TEST_FILE) up --no-deps --build db app 
 
-.PHONY: migrate-up migrate-down docker-up docker-down swagger local docker-up-db docker-down-db create-test-db migrate-test-db seed-test-db run-tests test
+.PHONY: dev-db-up dev-db-down migrate-dev-db-up migrate-dev-db-down swagger start dev run-tests docker-test

@@ -11,7 +11,7 @@ var Db *sql.DB
 
 func TestMain(m *testing.M) {
 	var err error
-	dbConnectionString := "postgresql://postgres:mysecretpassword@db:5432/tamra-postgis-test?sslmode=disable"
+	dbConnectionString := os.Getenv("TEST_DB_CONNECTION_STRING")
 
 	Db, err = utils.NewDB(dbConnectionString)
 
