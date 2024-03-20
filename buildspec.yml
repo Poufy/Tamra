@@ -1,8 +1,8 @@
 version: 0.2
 run-as: root
 
-env:
-  variables:
+# env:
+  # variables:
     # POSTGRES_DB: "tamra-postgis-test"
     # https://hub.docker.com/_/postgres#:~:text=for%20more%20details.-,POSTGRES_DB,-This%20optional%20environment
 phases:
