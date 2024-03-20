@@ -31,8 +31,6 @@ phases:
       - zip -ur bin/bootstrap.zip docs/
   post_build:
     commands:
-      - echo "Cleaning up..."
-      - docker-compose -f ./deployments/docker-compose-test.yml down
       - echo "Deploying with serverless..."
       - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
       - echo "Deployment completed."
