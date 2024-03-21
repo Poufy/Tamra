@@ -93,7 +93,7 @@ func (s *OrderServiceImpl) GetUserOrders(userID string) ([]*models.Order, error)
 		if order.CreatedAt.Add(15*time.Minute).Before(time.Now()) && order.State == "PENDING" {
 			s.logger.Infof("Order %d is more than 15 minutes old. Rejecting it", order.ID)
 			// Update the order state to "REJECTED". We could have used UpdateUserOrderState as well. It doesn't matter.
-			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "REJECTED")
+			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "EXPIRED")
 			if err != nil {
 				return nil, fmt.Errorf("failed to reject order: %w", err)
 			}
@@ -131,7 +131,7 @@ func (s *OrderServiceImpl) GetRestaurantOrders(restaurantID string) ([]*models.O
 		if order.CreatedAt.Add(15*time.Minute).Before(time.Now()) && order.State == "PENDING" {
 			s.logger.Infof("Order %d is more than 15 minutes old. Rejecting it", order.ID)
 			// Update the order state to "REJECTED". We could have used UpdateUserOrderState as well. It doesn't matter.
-			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "REJECTED")
+			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "EXPIRED")
 			if err != nil {
 				return nil, fmt.Errorf("failed to reject order: %w", err)
 			}
@@ -218,7 +218,7 @@ func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
 
 func (s *OrderServiceImpl) ReassignOrder(id int, fbUID string) error {
 	// Update the order state to "REJECTED"
-	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "REJECTED")
+	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "EXPIRED")
 	if err != nil {
 
 		return fmt.Errorf("failed to reassign order: %w", err)

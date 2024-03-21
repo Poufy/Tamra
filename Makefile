@@ -14,7 +14,7 @@ DOCKER_COMPOSE_TEST_FILE = ./deployments/test.docker-compose.yml
 # Build and run Docker Compose for local development
 dev-db-up:
 	@echo "Starting the database container..."
-	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -p $(TEST_DB_PORT):5432 -d postgis/postgis
+	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -p $(TEST_DB_PORT):5432 postgis/postgis
 
 dev-db-down:
 	@echo "Stopping the database container..."
