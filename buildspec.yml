@@ -15,12 +15,22 @@ phases:
       - go install github.com/swaggo/swag/cmd/swag@latest
   pre_build:
     commands:
+      - echo "Logging into ECR..."
+      - docker version
+      - $(aws ecr get-login --no-include-email --region eu-central-1)
+      - REPO_URI=797443084412.dkr.ecr.eu-central-1.amazonaws.com/tamra-dev
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7) || "latest"
+      - echo "Pulling existing image for layer cache..."
+      - docker pull $REPO_URI:$IMAGE_TAG || true # Pull the existing image to use as a cache layer
+
+  build:
+    commands:
+      - echo "Building the app..."
+      - docker build --cache-from $REPO_URI:$IMAGE_TAG -t $REPO_URI:$IMAGE_TAG -f ./deployments/test.Dockerfile .
       - docker-compose -f ./deployments/test.docker-compose.yml up -d db
       # We use the --rm flag to remove the container after the tests are done. If it fails, that means the tests failed, otherwise, it will be removed with this command.
       - docker-compose -f ./deployments/test.docker-compose.yml run --rm app
       - echo "Tests ran successfully."
-  build:
-    commands:
       - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -tags lambda.norpc -o bin/bootstrap cmd/tamra/main.go
       - echo "Zipping the binary file into the root directory of the zip" 
       # The -j flag will store just the file, not the full path. The bootstrap file must be in the root directory of the zip.
@@ -31,6 +41,8 @@ phases:
       - zip -ur bin/bootstrap.zip docs/
   post_build:
     commands:
+      - echo "Pushing the image to ECR..."
+      - docker push $REPO_URI:$IMAGE_TAG
       - echo "Deploying with serverless..."
       - serverless deploy --stage ${PIPELINE_BRANCH} --region ${PIPELINE_REGION} --verbose
       - echo "Deployment completed."
