@@ -19,7 +19,8 @@ phases:
       - docker version
       - aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 797443084412.dkr.ecr.eu-central-1.amazonaws.com
       - REPO_URI=797443084412.dkr.ecr.eu-central-1.amazonaws.com/tamra-dev
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7) || "latest"
+      # - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7) || "latest"
+      - IMAGE_TAG=latest
       - echo "Pulling existing image for layer cache..."
       - docker pull $REPO_URI:$IMAGE_TAG || true # Pull the existing image to use as a cache layer
 
