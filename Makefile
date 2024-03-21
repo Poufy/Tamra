@@ -14,7 +14,7 @@ DOCKER_COMPOSE_TEST_FILE = ./deployments/test.docker-compose.yml
 # Build and run Docker Compose for local development
 dev-db-up:
 	@echo "Starting the database container..."
-	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -p $(TEST_DB_PORT):5432 postgis/postgis
+	docker run --name $(TEST_DB_CONTAINER_NAME) -e POSTGRES_USER=$(TEST_DB_USER) -e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) -e POSTGRES_DB=$(TEST_DB_NAME) -p $(TEST_DB_PORT):$(TEST_DB_PORT) postgis/postgis
 
 dev-db-down:
 	@echo "Stopping the database container..."
@@ -22,11 +22,15 @@ dev-db-down:
 	
 migrate-dev-db-up:
 	@echo "Running migrations..."
-	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" up
+	migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" up
 
 migrate-dev-db-down:
 	@echo "Running migrations..."
-	migrate -path $(MIGRATION_DIR) -database "postgresql://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable" down
+	migrate -path $(MIGRATION_DIR) -database "postgresql://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable" down
+
+seed-dev-db:
+	@echo "Seeding the database..."
+	PGPASSWORD=$(TEST_DB_PASSWORD) psql -h localhost -U $(TEST_DB_USER) -d $(TEST_DB_NAME) -f ./seeds/seed.sql
 
 swagger:
 	@echo "Generating Swagger documentation..."
@@ -34,14 +38,17 @@ swagger:
 
 start:
 	@echo "Running the application locally..."
-	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://postgres:mysecretpassword@localhost:5432/tamra-postgis?sslmode=disable
+	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable
 
 dev : swagger start
 
+# Variable is used to set the database connection string for the test database
+export TEST_DB_CONNECTION_STRING=postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable
 run-tests:
 	@echo "Running tests..."
 	go test -v ./...
 
+test: migrate-dev-db-up seed-dev-db run-tests migrate-dev-db-down
 # Run tests in Docker. This is the process that will be used in CI/CD on AWS CodeBuild
 docker-test:
 	@echo "Running tests..."

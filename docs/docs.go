@@ -515,6 +515,32 @@ const docTemplate = `{
                     }
                 }
             },
+            "delete": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Delete a restaurant",
+                "tags": [
+                    "restaurants"
+                ],
+                "summary": "Delete a restaurant",
+                "responses": {
+                    "204": {
+                        "description": "Restaurant deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "security": [
                     {
@@ -692,6 +718,32 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "failed to get user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Delete a user",
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "responses": {
+                    "200": {
+                        "description": "User deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete user",
                         "schema": {
                             "type": "string"
                         }

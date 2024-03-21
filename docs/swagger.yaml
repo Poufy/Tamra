@@ -503,6 +503,22 @@ paths:
       tags:
       - restaurants
   /restaurants/me:
+    delete:
+      description: Delete a restaurant
+      responses:
+        "204":
+          description: Restaurant deleted
+          schema:
+            type: string
+        "500":
+          description: Failed to delete restaurant
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Delete a restaurant
+      tags:
+      - restaurants
     get:
       description: Get a restaurant by the user ID
       produces:
@@ -589,6 +605,22 @@ paths:
       tags:
       - users
   /users/me:
+    delete:
+      description: Delete a user
+      responses:
+        "200":
+          description: User deleted
+          schema:
+            type: string
+        "500":
+          description: Failed to delete user
+          schema:
+            type: string
+      security:
+      - jwt: []
+      summary: Delete a user
+      tags:
+      - users
     get:
       description: Get a user by the user ID
       produces:

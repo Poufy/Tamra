@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"Tamra/internal/pkg/models"
+	"Tamra/internal/pkg/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -120,4 +121,73 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 	assert.Equal(t, createdUser.Phone, updatedUser.Phone)
 	assert.Equal(t, createdUser.Radius, updatedUser.Radius)
 	assert.Equal(t, createdUser.FCMToken, updatedUser.FCMToken)
+}
+
+func TestUserRepository_GetUserToReceiveOrder(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+	restaurantRepo := NewRestaurantRepository(Db)
+
+	user := &models.User{
+		ID:        "gfdgdsa",
+		Longitude: 19.4213234,
+		Latitude:  77.5945667,
+		IsActive:  true,
+		Phone:     "4246123423",
+		Radius:    100,
+		FCMToken:  "gdfadsadcwqeqdsdf",
+	}
+
+	restaurantInReach := &models.Restaurant{
+		ID:                  "uyfrghgf",
+		Longitude:           19.4213234,
+		Latitude:            77.5945667,
+		LogoURL:             "https://www.google.com",
+		Name:                "Test Restaurant1",
+		PhoneNumber:         "427536423423",
+		LocationDescription: "Test Location",
+	}
+
+	restaurantNotInReach := &models.Restaurant{
+		ID:                  "hgfhgfh",
+		Longitude:           40.9715987,
+		Latitude:            50.5945667,
+		LogoURL:             "https://www.google.com",
+		Name:                "Test Restaurant2",
+		PhoneNumber:         "3216531",
+		LocationDescription: "Test Location",
+	}
+
+	createdUser, err := userRepo.CreateUser(user)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+
+	createdRestaurantInReach, err := restaurantRepo.CreateRestaurant(restaurantInReach)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, createdRestaurantInReach)
+
+	createdRestaurantNotInReach, err := restaurantRepo.CreateRestaurant(restaurantNotInReach)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, createdRestaurantNotInReach)
+
+	// Get the user that should receive the order
+	userToReceiveOrder, err := userRepo.GetUserToReceiveOrder(restaurantInReach.ID)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, userToReceiveOrder)
+	assert.Equal(t, user.ID, userToReceiveOrder.ID)
+	assert.Equal(t, user.Longitude, userToReceiveOrder.Longitude)
+	assert.Equal(t, user.Latitude, userToReceiveOrder.Latitude)
+	assert.Equal(t, user.IsActive, userToReceiveOrder.IsActive)
+	assert.Equal(t, user.Phone, userToReceiveOrder.Phone)
+	assert.Equal(t, user.Radius, userToReceiveOrder.Radius)
+	assert.Equal(t, user.FCMToken, userToReceiveOrder.FCMToken)
+
+	// Case where no user is in reach and we should get an error of type ErrNotFound
+	_, err = userRepo.GetUserToReceiveOrder(restaurantNotInReach.ID)
+
+	assert.Error(t, err)
+	assert.Equal(t, err, utils.ErrNotFound)
 }

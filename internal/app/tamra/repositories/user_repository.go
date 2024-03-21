@@ -106,6 +106,9 @@ func (r *UserRepositoryImpl) GetUserToReceiveOrder(restaurantID string) (*models
 	`
 	user := &models.User{}
 	err := r.db.QueryRow(query, restaurantID).Scan(&user.ID, &user.Longitude, &user.Latitude, &user.IsActive, &user.Phone, &user.Radius, &user.FCMToken, &user.LastOrderReceived, &user.CreatedAt, &user.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, utils.ErrNotFound
+	}
 	return user, err
 }
 

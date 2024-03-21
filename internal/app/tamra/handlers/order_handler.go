@@ -36,6 +36,7 @@ func NewOrderHandler(orderService services.OrderService, validator Validator, lo
 //	@Security		jwt
 //	@Success		201	{object}	models.Order	"Created Order"
 //	@Failure		400	{string}	string			"Invalid request body"
+//	@Failure		404	{string}	string			"no user to receive order"
 //	@Failure		500	{string}	string			"Failed to create order"
 //	@Router			/orders [post]
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +69,12 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	createdOrder, err := h.orderService.CreateOrder(order)
 	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			h.logger.WithError(err).Errorf("Request ID %s: No user to receive order", r.Context().Value(chimiddleware.RequestIDKey))
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "no user to receive order")
+			return
+		}
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to create order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to create order")

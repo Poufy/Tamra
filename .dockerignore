@@ -1,1 +1,7 @@
 bin
+.serverless
+.git
+.gitignore
+serverless.yml
+.air.toml
+.env

@@ -50,7 +50,9 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	user, err := s.userRepository.GetUserToReceiveOrder(order.RestaurantID)
 	s.logger.Infof("User to receive order: %v", user)
 	if err != nil {
-
+		if err == utils.ErrNotFound {
+			return nil, fmt.Errorf("no user found to receive order: %w", err)
+		}
 		return nil, fmt.Errorf("failed to get user to receive order: %w", err)
 	}
 
