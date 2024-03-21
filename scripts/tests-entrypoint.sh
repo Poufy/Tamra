@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # First, wait for the database to be ready
-/usr/local/bin/wait-for-it.sh ${TEST_DB_HOST}:${TEST_DB_PORT}  -- echo "Database is up"
+/usr/local/bin/wait-for-it.sh ${TEST_DB_HOST}:${TEST_DB_PORT} -t 30  -- echo "Database is up"
 
 # Now run the migrations
 echo "Running migrations..."

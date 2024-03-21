@@ -64,7 +64,7 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 
 	// Notify the user that a new order has been created.
 	// Ideally this would be done in a seperate service that handles notifications
-	err = s.notificationService.NotifyUser(user.FCMToken, order)
+	err = s.notificationService.NotifyUser(user.FCMToken, "لديك طلب جديد", "انقر لعرض تفاصيل الطلب والرد عليه")
 	s.logger.Info("User notified")
 	if err != nil {
 
@@ -160,6 +160,17 @@ func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to cancel order: %w", err)
 	}
+
+	order, err := s.orderRepository.GetOrder(id, fbUID)
+
+	// Get the user to send the notification to
+	user, err := s.userRepository.GetUser(order.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// Notify the user that the order has been cancelled
+	err = s.notificationService.NotifyUser(user.FCMToken, "تم الغاء طلبك", "قام المطعم بالغاء طلبك")
 
 	return nil
 }

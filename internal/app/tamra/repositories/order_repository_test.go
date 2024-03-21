@@ -181,27 +181,28 @@ func TestOrderRepository_UpdateRestaurantOrderState(t *testing.T) {
 	assert.Equal(t, "ACCEPTED", retrievedOrder.State)
 }
 
-// func TestOrderRepository_DeleteOrder(t *testing.T) {
-// 	orderRepo := NewOrderRepository(Db)
+func TestOrderRepository_CancelOrder(t *testing.T) {
+	orderRepo := NewOrderRepository(Db)
 
-// 	// Create a new order
-// 	order := &models.Order{
-// 		UserID:       "user1",       // User from the seed
-// 		RestaurantID: "restaurant1", // Restaurant from the seed
-// 		Code:         "6125213",
-// 		Description:  "Test Order",
-// 	}
+	// Create a new order
+	order := &models.Order{
+		UserID:       "user1",
+		RestaurantID: "restaurant1",
+		Code:         "61225432",
+		Description:  "Test Order",
+	}
 
-// 	createdOrder, err := orderRepo.CreateOrder(order)
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, createdOrder)
+	createdOrder, err := orderRepo.CreateOrder(order)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdOrder)
 
-// 	// Delete the order
-// 	err = orderRepo.DeleteOrder(createdOrder.ID)
-// 	assert.NoError(t, err)
+	// Cancel the order
+	err = orderRepo.UpdateUserOrderState(createdOrder.ID, createdOrder.UserID, "CANCELLED")
+	assert.NoError(t, err)
 
-// 	// Get the deleted order
-// 	retrievedOrder, err := orderRepo.GetOrder(createdOrder.ID, createdOrder.RestaurantID)
-// 	assert.Error(t, err)
-// 	assert.Nil(t, retrievedOrder)
-// }
+	// Get the updated order
+	retrievedOrder, err := orderRepo.GetOrder(createdOrder.ID, createdOrder.RestaurantID)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedOrder)
+	assert.Equal(t, "CANCELLED", retrievedOrder.State)
+}

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"Tamra/internal/pkg/models"
 	"context"
 	"fmt"
 
@@ -10,7 +9,7 @@ import (
 )
 
 type NotificationService interface {
-	NotifyUser(fcmToken string, order *models.Order) error
+	NotifyUser(fcmToken string, title string, body string) error
 }
 
 type NotificationServiceImpl struct {
@@ -22,7 +21,7 @@ func NewNotificationService(logger logrus.FieldLogger, messagingClient *messagin
 	return &NotificationServiceImpl{logger: logger, messagingClient: messagingClient}
 }
 
-func (ns NotificationServiceImpl) NotifyUser(fcmToken string, order *models.Order) error {
+func (ns NotificationServiceImpl) NotifyUser(fcmToken string, title string, body string) error {
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "New Order Received",
