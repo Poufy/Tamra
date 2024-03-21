@@ -90,12 +90,23 @@ func (s *OrderServiceImpl) GetUserOrders(userID string) ([]*models.Order, error)
 
 	// Iterate over the orders and if the time since the order was created is more than 15 minutes, we update the order state to "REJECTED"
 	for _, order := range orders {
-		if order.CreatedAt.Add(15 * time.Minute).Before(time.Now()) {
+		if order.CreatedAt.Add(15*time.Minute).Before(time.Now()) && order.State == "PENDING" {
 			s.logger.Infof("Order %d is more than 15 minutes old. Rejecting it", order.ID)
 			// Update the order state to "REJECTED". We could have used UpdateUserOrderState as well. It doesn't matter.
 			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "REJECTED")
 			if err != nil {
 				return nil, fmt.Errorf("failed to reject order: %w", err)
+			}
+			// Update the user is_active to false
+			user, err := s.userRepository.GetUser(userID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get user: %w", err)
+			}
+
+			user.IsActive = false
+			_, err = s.userRepository.UpdateUser(user)
+			if err != nil {
+				return nil, fmt.Errorf("failed to update user: %w", err)
 			}
 		}
 	}
@@ -115,6 +126,36 @@ func (s *OrderServiceImpl) GetRestaurantOrders(restaurantID string) ([]*models.O
 
 		return nil, fmt.Errorf("failed to get restaurant orders: %w", err)
 	}
+
+	for _, order := range orders {
+		if order.CreatedAt.Add(15*time.Minute).Before(time.Now()) && order.State == "PENDING" {
+			s.logger.Infof("Order %d is more than 15 minutes old. Rejecting it", order.ID)
+			// Update the order state to "REJECTED". We could have used UpdateUserOrderState as well. It doesn't matter.
+			err = s.orderRepository.UpdateRestaurantOrderState(order.ID, order.RestaurantID, "REJECTED")
+			if err != nil {
+				return nil, fmt.Errorf("failed to reject order: %w", err)
+			}
+
+			// Update the user is_active to false
+			user, err := s.userRepository.GetUser(order.UserID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get user: %w", err)
+			}
+
+			user.IsActive = false
+			_, err = s.userRepository.UpdateUser(user)
+			if err != nil {
+				return nil, fmt.Errorf("failed to update user: %w", err)
+			}
+		}
+	}
+
+	// Get the updated list of orders
+	orders, err = s.orderRepository.GetRestaurantOrders(restaurantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get restaurant orders: %w", err)
+	}
+
 	return orders, nil
 }
 
