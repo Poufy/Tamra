@@ -3,8 +3,8 @@ CREATE TABLE orders (
     code VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
     state VARCHAR(100) NOT NULL DEFAULT 'PENDING',
-    restaurant_id VARCHAR(255) REFERENCES restaurants(id) NOT NULL,
-    user_id VARCHAR(255) REFERENCES users(id) NOT NULL,
+    restaurant_id VARCHAR(255) REFERENCES restaurants(id) ON DELETE SET NULL,
+    user_id VARCHAR(255) REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

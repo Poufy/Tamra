@@ -5,6 +5,7 @@ import (
 	"Tamra/internal/pkg/utils"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -190,4 +191,66 @@ func TestUserRepository_GetUserToReceiveOrder(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, err, utils.ErrNotFound)
+}
+
+func TestUserRepository_DeleteUser(t *testing.T) {
+	userRepo := NewUserRepository(Db)
+	restaurantRepo := NewRestaurantRepository(Db)
+	orderRepo := NewOrderRepository(Db)
+
+	user := &models.User{
+		ID:        "ddsadsad",
+		Longitude: 12.9715987,
+		Latitude:  77.5945667,
+		IsActive:  true,
+		Phone:     "613421332",
+		Radius:    1000,
+		FCMToken:  "145267115",
+	}
+
+	// We should also create a restaurant and an order to test the foreign key constraints
+
+	restaurant := &models.Restaurant{
+		ID:                  "4213213das",
+		Longitude:           12.9715987,
+		Latitude:            77.5945667,
+		LogoURL:             "https://www.google.com",
+		Name:                "Test dsadsa",
+		PhoneNumber:         "42423521423",
+		LocationDescription: "Test Location",
+	}
+
+	order := &models.Order{
+		UserID:       user.ID,
+		RestaurantID: restaurant.ID,
+		Code:         "31271312",
+		Description:  "Test Order",
+	}
+
+	createdUser, err := userRepo.CreateUser(user)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+
+	createdRestaurant, err := restaurantRepo.CreateRestaurant(restaurant)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdRestaurant)
+
+	createdOrder, err := orderRepo.CreateOrder(order)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdOrder)
+
+	err = userRepo.DeleteUser(user.ID)
+	assert.NoError(t, err)
+
+	// Check if the user was deleted
+	_, err = userRepo.GetUser(user.ID)
+	assert.Error(t, err)
+	assert.Equal(t, err, utils.ErrNotFound)
+
+	// Check if the user id was set to null in the order
+	retrievedOrder, err := orderRepo.GetOrder(order.ID, order.RestaurantID)
+	logrus.Infof("Order after user deletion %+v", retrievedOrder)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedOrder)
+	assert.Equal(t, "", retrievedOrder.UserID)
 }

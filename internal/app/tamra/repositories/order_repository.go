@@ -45,7 +45,18 @@ func (r *OrderRepositoryImpl) CreateOrder(order *models.Order) (*models.Order, e
 
 func (r *OrderRepositoryImpl) GetOrder(id int, fbUID string) (*models.Order, error) {
 	order := &models.Order{}
-	err := r.db.QueryRow("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE id = $1 AND restaurant_id = $2", id, fbUID).Scan(&order.ID, &order.UserID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
+	var userID sql.NullString // We use sql.NullString to handle the case where the user_id is null
+
+	err := r.db.QueryRow("SELECT id, user_id, restaurant_id, code, state, description, created_at, updated_at FROM orders WHERE id = $1 AND restaurant_id = $2", id, fbUID).Scan(&order.ID, &userID, &order.RestaurantID, &order.Code, &order.State, &order.Description, &order.CreatedAt, &order.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	// If the user_id is not null, we set it in the order, otherwise we leave it as an empty string
+	if userID.Valid {
+		order.UserID = userID.String
+	}
+
 	return order, err
 }
 
