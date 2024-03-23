@@ -32,7 +32,7 @@ func UserAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogger) fu
 			// // Print all token details
 			// // fmt.Printf("Token: %v\n", tokenWithClaims)
 			logger.Infof("Passed auth token: %+v.", tokenWithClaims)
-			ctx := context.WithValue(r.Context(), "UID", "432")
+			ctx := context.WithValue(r.Context(), "UID", tokenWithClaims.UID)
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -72,7 +72,7 @@ func RestaurantAuthMiddleware(firebaseAuth *auth.Client, logger logrus.FieldLogg
 			// print the email
 			logger.Info("Email: %v", tokenWithClaims.Claims["email"])
 
-			ctx := context.WithValue(r.Context(), "UID", "543")
+			ctx := context.WithValue(r.Context(), "UID", tokenWithClaims.UID)
 
 			// If the token is valid, we can continue the chain of handlers and pass the context
 			next.ServeHTTP(w, r.WithContext(ctx))
