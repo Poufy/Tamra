@@ -256,55 +256,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{id}/reassign": {
-            "post": {
-                "security": [
-                    {
-                        "jwt": []
-                    }
-                ],
-                "description": "Reassign a order",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Reassign a order",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "invalid order ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "failed to reassign order",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/orders/{id}/reject": {
             "patch": {
                 "security": [
@@ -396,6 +347,55 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "failed to cancel order",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order_id}/reassign": {
+            "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Reassign a order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Reassign a order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid order ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to reassign order",
                         "schema": {
                             "type": "string"
                         }

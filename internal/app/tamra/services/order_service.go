@@ -219,6 +219,7 @@ func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
 	return nil
 }
 
+// TODO: Turn this into a transaction
 func (s *OrderServiceImpl) ReassignOrder(id int, fbUID string) error {
 	// Update the order state to "REJECTED"
 	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "EXPIRED")
@@ -234,10 +235,21 @@ func (s *OrderServiceImpl) ReassignOrder(id int, fbUID string) error {
 		return fmt.Errorf("failed to get order: %w", err)
 	}
 
+	// Get the user and update the is_active to false
+	user, err := s.userRepository.GetUser(order.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	user.IsActive = false
+	_, err = s.userRepository.UpdateUser(user)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+
 	// Create the new order
 	_, err = s.CreateOrder(order)
 	if err != nil {
-
 		return fmt.Errorf("failed to create order: %w", err)
 	}
 

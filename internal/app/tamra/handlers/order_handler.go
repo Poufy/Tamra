@@ -404,16 +404,17 @@ func (h *OrderHandler) FulfillOrder(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"Order ID"
+//	@Param			order_id	path	int	true	"Order ID"
 //	@Security		jwt
 //	@Success		200	{string}	string	"OK"
 //	@Failure		400	{string}	string	"invalid order ID"
+//	@Failure		404	{string}	string	"no user to receive order"
 //	@Failure		500	{string}	string	"failed to reassign order"
-//	@Router			/orders/{id}/reassign [post]
+//	@Router			/orders/{order_id}/reassign [post]
 func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to reassign order.", r.Context().Value(chimiddleware.RequestIDKey))
 	// We must extract the ID from the URL and the user ID from the request context to make sure the user is the owner of the order
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	orderID, err := strconv.Atoi(chi.URLParam(r, "order_id"))
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
@@ -423,9 +424,16 @@ func (h *OrderHandler) ReassignOrder(w http.ResponseWriter, r *http.Request) {
 
 	firebaseUID := r.Context().Value("UID").(string)
 
-	err = h.orderService.ReassignOrder(id, firebaseUID)
+	err = h.orderService.ReassignOrder(orderID, firebaseUID)
 
 	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			h.logger.WithError(err).Errorf("Request ID %s: No user to receive order", r.Context().Value(chimiddleware.RequestIDKey))
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "no user to receive order")
+			return
+		}
+
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to reassign order", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "failed to reassign order")
