@@ -57,6 +57,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "404": {
+                        "description": "no user to receive order",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "500": {
                         "description": "Failed to create order",
                         "schema": {
@@ -348,7 +354,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{orderID}/cancel": {
+        "/orders/{order_id}/cancel": {
             "patch": {
                 "security": [
                     {
@@ -370,7 +376,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Order ID",
-                        "name": "id",
+                        "name": "order_id",
                         "in": "path",
                         "required": true
                     }
@@ -383,7 +389,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "order not accepted",
+                        "description": "invalid order ID",
                         "schema": {
                             "type": "string"
                         }
@@ -804,14 +810,8 @@ const docTemplate = `{
     "definitions": {
         "models.CreateOrderRequest": {
             "type": "object",
-            "required": [
-                "restaurant_id"
-            ],
             "properties": {
                 "description": {
-                    "type": "string"
-                },
-                "restaurant_id": {
                     "type": "string"
                 }
             }

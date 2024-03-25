@@ -4,10 +4,6 @@ definitions:
     properties:
       description:
         type: string
-      restaurant_id:
-        type: string
-    required:
-    - restaurant_id
     type: object
   models.CreateRestaurantRequest:
     properties:
@@ -204,6 +200,10 @@ paths:
           description: Invalid request body
           schema:
             type: string
+        "404":
+          description: no user to receive order
+          schema:
+            type: string
         "500":
           description: Failed to create order
           schema:
@@ -337,7 +337,7 @@ paths:
       summary: Reject a order
       tags:
       - orders
-  /orders/{orderID}/cancel:
+  /orders/{order_id}/cancel:
     patch:
       consumes:
       - application/json
@@ -345,7 +345,7 @@ paths:
       parameters:
       - description: Order ID
         in: path
-        name: id
+        name: order_id
         required: true
         type: integer
       produces:
@@ -356,7 +356,7 @@ paths:
           schema:
             type: string
         "400":
-          description: order not accepted
+          description: invalid order ID
           schema:
             type: string
         "500":

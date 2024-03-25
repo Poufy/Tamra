@@ -26,8 +26,8 @@ func (router *OrderRouter) GetRouter() chi.Router {
 		r.Post("/", router.orderHandler.CreateOrder)
 		r.Get("/restaurant", router.orderHandler.GetRestaurantOrders)
 		r.Post("/{id}/reassign", router.orderHandler.ReassignOrder)
-		r.Patch("/{orderID}/fulfill", router.orderHandler.FulfillOrder)
-		r.Patch("/{orderID}/cancel", router.orderHandler.CancelOrder)
+		r.Patch("/{order_id}/fulfill", router.orderHandler.FulfillOrder)
+		r.Patch("/{order_id}/cancel", router.orderHandler.CancelOrder)
 	})
 
 	r.With(router.userAuthMiddleware).Group(func(r chi.Router) {

@@ -55,6 +55,12 @@
                             "type": "string"
                         }
                     },
+                    "404": {
+                        "description": "no user to receive order",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "500": {
                         "description": "Failed to create order",
                         "schema": {
@@ -346,7 +352,7 @@
                 }
             }
         },
-        "/orders/{orderID}/cancel": {
+        "/orders/{order_id}/cancel": {
             "patch": {
                 "security": [
                     {
@@ -368,7 +374,7 @@
                     {
                         "type": "integer",
                         "description": "Order ID",
-                        "name": "id",
+                        "name": "order_id",
                         "in": "path",
                         "required": true
                     }
@@ -381,7 +387,7 @@
                         }
                     },
                     "400": {
-                        "description": "order not accepted",
+                        "description": "invalid order ID",
                         "schema": {
                             "type": "string"
                         }
@@ -802,14 +808,8 @@
     "definitions": {
         "models.CreateOrderRequest": {
             "type": "object",
-            "required": [
-                "restaurant_id"
-            ],
             "properties": {
                 "description": {
-                    "type": "string"
-                },
-                "restaurant_id": {
                     "type": "string"
                 }
             }

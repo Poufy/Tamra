@@ -311,16 +311,15 @@ func (h *OrderHandler) RejectOrder(w http.ResponseWriter, r *http.Request) {
 //	@Tags			orders
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"Order ID"
+//	@Param			order_id	path	int	true	"Order ID"
 //	@Security		jwt
 //	@Success		200	{string}	string	"OK"
 //	@Failure		400	{string}	string	"invalid order ID"
-//	@Failure		400	{string}	string	"order not accepted"
 //	@Failure		500	{string}	string	"failed to cancel order"
-//	@Router			/orders/{orderID}/cancel [patch]
+//	@Router			/orders/{order_id}/cancel [patch]
 func (h *OrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to cancel order.", r.Context().Value(chimiddleware.RequestIDKey))
-	orderID, err := strconv.Atoi(chi.URLParam(r, "orderID"))
+	orderID, err := strconv.Atoi(chi.URLParam(r, "order_id"))
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)

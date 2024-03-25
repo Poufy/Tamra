@@ -44,11 +44,11 @@ dev : swagger start
 
 # Variable is used to set the database connection string for the test database
 export TEST_DB_CONNECTION_STRING=postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable
-run-tests:
+run-unit-tests:
 	@echo "Running tests..."
 	go test -v ./...
 
-test: migrate-dev-db-up seed-dev-db run-tests migrate-dev-db-down
+test: migrate-dev-db-up seed-dev-db run-unit-tests migrate-dev-db-down
 # Run tests in Docker. This is the process that will be used in CI/CD on AWS CodeBuild
 docker-test:
 	@echo "Running tests..."

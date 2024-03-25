@@ -199,7 +199,7 @@ func (s *OrderServiceImpl) RejectOrder(id int, fbUID string) error {
 }
 
 func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
-	err := s.orderRepository.UpdateUserOrderState(id, fbUID, "CANCELLED")
+	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "CANCELLED")
 	if err != nil {
 		return fmt.Errorf("failed to cancel order: %w", err)
 	}
@@ -212,6 +212,7 @@ func (s *OrderServiceImpl) CancelOrder(id int, fbUID string) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
+	s.logger.Infof("Notifying user %s that their order has been cancelled", user.ID)
 	// Notify the user that the order has been cancelled
 	err = s.notificationService.NotifyUser(user.FCMToken, "تم الغاء طلبك", "قام المطعم بالغاء طلبك")
 
