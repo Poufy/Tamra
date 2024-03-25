@@ -50,8 +50,6 @@ func main() {
 	// Read the configuration
 	config := utils.GetConfig()
 
-	fmt.Println("Configuration values in main", config)
-	// Connect to the database
 	db, err := utils.NewDB(config.DBConn)
 
 	if err != nil {

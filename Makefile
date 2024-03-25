@@ -38,7 +38,7 @@ swagger:
 
 start:
 	@echo "Running the application locally..."
-	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -port=8080 -db=postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable
+	go build -o ./bin/tamra ./cmd/tamra/  && ./bin/tamra -stage=local -port=8080 -db=postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=disable
 
 dev : swagger start
 

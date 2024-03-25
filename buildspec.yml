@@ -41,6 +41,9 @@ phases:
       - zip -j bin/bootstrap.zip bin/bootstrap
       - echo "Generating swagger docs"
       - swag init -d ./cmd/tamra,./internal/app/tamra/handlers -g main.go --parseInternal --parseDependency -o docs
+      - echo "Replacing the host in the swagger docs with the API Gateway URL"
+      - chmod +x ./scripts/replace-swagger-host.sh
+      - ./scripts/replace-swagger-host.sh $PIPELINE_HOST
       - echo "Zipping the docs directory into the docs directory of the zip"
       - zip -ur bin/bootstrap.zip docs/
   post_build:
