@@ -69,7 +69,6 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	err = s.notificationService.NotifyUser(user.FCMToken, "لديك طلب جديد", "انقر لعرض تفاصيل الطلب والرد عليه")
 	s.logger.Info("User notified")
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to notify user: %w", err)
 	}
 
@@ -77,7 +76,6 @@ func (s *OrderServiceImpl) CreateOrder(order *models.Order) (*models.Order, erro
 	user.LastOrderReceived = order.CreatedAt
 	_, err = s.userRepository.UpdateUser(user)
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
@@ -224,27 +222,27 @@ func (s *OrderServiceImpl) ReassignOrder(id int, fbUID string) error {
 	// Update the order state to "REJECTED"
 	err := s.orderRepository.UpdateRestaurantOrderState(id, fbUID, "EXPIRED")
 	if err != nil {
-
 		return fmt.Errorf("failed to reassign order: %w", err)
 	}
 
 	// Get the order
 	order, err := s.orderRepository.GetOrder(id, fbUID)
 	if err != nil {
-
 		return fmt.Errorf("failed to get order: %w", err)
 	}
 
-	// Get the user and update the is_active to false
-	user, err := s.userRepository.GetUser(order.UserID)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
+	// If the order has expired, meaning it has been more than 15 minutes since the order was created, we update the user is_active to false
+	if order.State == "EXPIRED" {
+		user, err := s.userRepository.GetUser(order.UserID)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
 
-	user.IsActive = false
-	_, err = s.userRepository.UpdateUser(user)
-	if err != nil {
-		return fmt.Errorf("failed to update user: %w", err)
+		user.IsActive = false
+		_, err = s.userRepository.UpdateUser(user)
+		if err != nil {
+			return fmt.Errorf("failed to update user: %w", err)
+		}
 	}
 
 	// Create the new order
