@@ -1,9 +1,9 @@
 CREATE TABLE users (
-    id VARCHAR(255) PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     location GEOGRAPHY(Point, 4326) NOT NULL,
     is_active BOOLEAN NOT NULL,
     fcm_token TEXT UNIQUE NOT NULL,
-    phone VARCHAR(255) UNIQUE,
+    phone TEXT NOT NULL,
     radius INT NOT NULL,
     last_order_received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

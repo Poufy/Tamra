@@ -48,7 +48,7 @@ run-unit-tests:
 	@echo "Running tests..."
 	go test -v ./...
 
-test: migrate-dev-db-up seed-dev-db run-unit-tests migrate-dev-db-down
+test: migrate-dev-db-up seed-dev-db run-unit-tests
 # Run tests in Docker. This is the process that will be used in CI/CD on AWS CodeBuild
 docker-test:
 	@echo "Running tests..."
