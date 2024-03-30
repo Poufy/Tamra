@@ -55,23 +55,27 @@ func MapUpdateUserRequestToUser(req *models.UpdateUserRequest) *models.User {
 // MapCreateRestaurantRequestToRestaurant maps a CreateRestaurantRequest to a Restaurant.
 func MapCreateRestaurantRequestToRestaurant(req *models.CreateRestaurantRequest) *models.Restaurant {
 	return &models.Restaurant{
-		Longitude: req.Longitude,
-		Latitude:  req.Latitude,
-		LogoURL:   req.LogoURL,
-		Name:      req.Name,
+		Longitude:           req.Longitude,
+		Latitude:            req.Latitude,
+		LogoURL:             req.LogoURL,
+		Name:                req.Name,
+		LocationDescription: req.LocationDescription,
+		PhoneNumber:         req.PhoneNumber,
 	}
 }
 
 // MapRestaurantToRestaurantResponse maps a Restaurant to a RestaurantResponse.
 func MapRestaurantToRestaurantResponse(restaurant *models.Restaurant) *models.RestaurantResponse {
 	return &models.RestaurantResponse{
-		ID:        restaurant.ID,
-		Longitude: restaurant.Longitude,
-		Latitude:  restaurant.Latitude,
-		LogoURL:   restaurant.LogoURL,
-		Name:      restaurant.Name,
-		CreatedAt: restaurant.CreatedAt,
-		UpdatedAt: restaurant.UpdatedAt,
+		ID:                  restaurant.ID,
+		Longitude:           restaurant.Longitude,
+		Latitude:            restaurant.Latitude,
+		LogoURL:             restaurant.LogoURL,
+		Name:                restaurant.Name,
+		LocationDescription: restaurant.LocationDescription,
+		PhoneNumber:         restaurant.PhoneNumber,
+		CreatedAt:           restaurant.CreatedAt,
+		UpdatedAt:           restaurant.UpdatedAt,
 	}
 }
 
@@ -86,10 +90,12 @@ func MapRestaurantsToRestaurantResponses(restaurants []*models.Restaurant) []*mo
 
 func MapUpdateRestaurantRequestToRestaurant(req *models.UpdateRestaurantRequest) *models.Restaurant {
 	return &models.Restaurant{
-		Longitude: req.Longitude,
-		Latitude:  req.Latitude,
-		LogoURL:   req.LogoURL,
-		Name:      req.Name,
+		Longitude:           req.Longitude,
+		Latitude:            req.Latitude,
+		LogoURL:             req.LogoURL,
+		Name:                req.Name,
+		LocationDescription: req.LocationDescription,
+		PhoneNumber:         req.PhoneNumber,
 	}
 }
 
