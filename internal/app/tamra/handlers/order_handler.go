@@ -366,7 +366,7 @@ func (h *OrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {
 //	@Router			/orders/{id}/fulfill [post]
 func (h *OrderHandler) FulfillOrder(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infof("Request ID %s: Received request to fulfill order.", r.Context().Value(chimiddleware.RequestIDKey))
-	orderID, err := strconv.Atoi(chi.URLParam(r, "orderID"))
+	orderID, err := strconv.Atoi(chi.URLParam(r, "order_id"))
 	if err != nil {
 		h.logger.WithError(err).Errorf("Request ID %s: Failed to parse id", r.Context().Value(chimiddleware.RequestIDKey))
 		w.WriteHeader(http.StatusBadRequest)
